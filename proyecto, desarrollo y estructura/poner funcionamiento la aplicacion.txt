@@ -1,0 +1,60 @@
+Una vez que estés en la carpeta correcta:
+Cuando estés en la carpeta correcta, deberías ver algo como:
+C:\Users\pepon\ruta\a\predictor-futbol-premium>
+Y si escribes dir, deberías ver archivos como:
+
+paquete.json
+README.md
+y carpetas como "backend", "frontend", etc.
+
+Para iniciar la aplicación:
+Una vez en la carpeta correcta, escribe:
+npm run dev
+Si recuerdas aproximadamente dónde guardaste el proyecto (por ejemplo, si estaba en Documentos, Descargas o Escritorio), dímelo y puedo darte instrucciones más específicas.ReintentarMETROC:\Users\pepon\OneDrive\Escritorio\predictor-futbol-premium3>npm run dev > predictor-futbol-premium@1.0.0 dev > nodemon backend/app.js [nodemon] 3.1.10 [nodemon] para reiniciar en cualquier momento, ingrese rs
+[nodemon] viendo la(s) ruta(s): . 
+[nodemon] viendo las extensiones: js,mjs,cjs,json [nodemon] iniciando node backend/app.js
+🚀 Servidor corriendo en http://localhost:3000 
+📊 Modo: developmentEditar¡Excelente! Veo que has podido iniciar correctamente la aplicación. El servidor está funcionando en http://localhost:3000 y está en modo de desarrollo. El mensaje que ves indica que:
+
+El servidor está funcionando correctamente ("🚀 Servidor corriendo en http://localhost:3000 ")
+Está en modo de desarrollo ("📊 Modo: desarrollo")
+Estás usando nodemon, que permite que los cambios que hagas se apliquen automáticamente sin tener que reiniciar el servidor
+
+Ahora puedes acceder a la aplicación:
+
+Abre tu navegador web (Chrome, Firefox, Edge, etc.)
+En la barra de direcciones, escribe:http://localhost:3000
+Presiona Enter
+
+Deberías ver la interfaz del Predictor de Fútbol Premium cargada en tu navegador. Desde allí podrás:
+
+Seleccionar ligas
+Elegir equipos
+Generar predicciones
+Ver los analisis en las diferentes pestañas
+
+Si necesita detener la aplicación:
+Cuando hayas terminado de usar la aplicación y quieras cerrar el servidor:
+
+Regresa a la ventana de la línea de comandos donde ves el mensaje "🚀 Servidor corriendo..."
+PresionaCtrl + C
+Si te pregunta si deseas finalizar el proceso, presiona S(o Yen inglés) y Enter
+
+Si quieres reiniciar el servidor:
+Si por alguna razón necesitas reiniciar el servidor mientras lo estás ejecutando:
+
+En la misma ventana de comandos, escribe rsy presiona Enter.
+El servidor se reiniciará automáticamente
+
+Para volver a iniciar la aplicación más tarde:
+Cuando quieras usar la aplicación de nuevo en otro momento:
+
+Abre una nueva ventana de línea de comandos
+Navega a la carpeta del proyecto con:
+cd OneDrive\Escritorio\predictor-futbol-premium3
+
+Ejecuta de nuevo:
+npm run dev
+
+
+¿Has podido ver la aplicación en el navegador? ¿Hay algo más que necesites saber sobre cómo usar o navegar por la aplicación?ReintentarClaude no tiene acceso a internet. Los enlaces proporcionados pueden no ser precisos o estar actualizados.Claude puede cometer errores. Por favor, verifique las respuestas.
