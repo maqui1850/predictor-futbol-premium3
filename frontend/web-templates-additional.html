@@ -1,0 +1,593 @@
+<!-- web/templates/matches.html -->
+{% extends 'base.html' %}
+
+{% block title %}Partidos - Predictor Fútbol Premium{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-calendar-event"></i> Próximos Partidos</h4>
+            </div>
+            <div class="card-body">
+                {% if upcoming_matches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Competición</th>
+                                    <th>Partido</th>
+                                    <th>Estadio</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for match in upcoming_matches %}
+                                    <tr>
+                                        <td>{{ match.match_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                        <td>{{ match.competition }}</td>
+                                        <td>
+                                            <strong>{{ match.local_team.name }}</strong> vs <strong>{{ match.away_team.name }}</strong>
+                                        </td>
+                                        <td>{{ match.stadium }}</td>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-sm btn-outline-primary">
+                                                Detalles
+                                            </a>
+                                            {% if current_user.is_authenticated %}
+                                                <a href="{{ url_for('predict', match_id=match.id) }}" class="btn btn-sm btn-success">
+                                                    Predecir
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">No hay partidos próximos programados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-trophy"></i> Resultados Recientes</h4>
+            </div>
+            <div class="card-body">
+                {% if past_matches %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Competición</th>
+                                    <th>Partido</th>
+                                    <th>Resultado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for match in past_matches %}
+                                    <tr>
+                                        <td>{{ match.match_date.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ match.competition }}</td>
+                                        <td>
+                                            <strong>{{ match.local_team.name }}</strong> vs <strong>{{ match.away_team.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ match.local_score }}</strong> - <strong>{{ match.away_score }}</strong>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-sm btn-outline-primary">
+                                                Detalles
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">No hay resultados recientes disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- web/templates/match_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}Detalles del Partido - Predictor Fútbol Premium{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header {% if match.status == 'finished' %}bg-success{% elif match.status == 'in_progress' %}bg-info{% else %}bg-primary{% endif %} text-white">
+                <h4 class="mb-0">
+                    {% if match.status == 'finished' %}
+                        <i class="bi bi-check-circle"></i> Partido Finalizado
+                    {% elif match.status == 'in_progress' %}
+                        <i class="bi bi-play-circle"></i> En Curso
+                    {% else %}
+                        <i class="bi bi-calendar-event"></i> Próximo Partido
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <h5>{{ match.local_team.name }}</h5>
+                        {% if match.local_team.logo_url %}
+                            <img src="{{ match.local_team.logo_url }}" alt="{{ match.local_team.name }}" class="img-fluid" style="max-height: 100px;">
+                        {% else %}
+                            <div class="team-placeholder">{{ match.local_team.name[0] }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-center">
+                        {% if match.status == 'finished' %}
+                            <h1 class="display-4">{{ match.local_score }} - {{ match.away_score }}</h1>
+                        {% elif match.status == 'in_progress' %}
+                            <h1 class="display-4">? - ?</h1>
+                            <div class="badge bg-info text-white">En juego</div>
+                        {% else %}
+                            <div class="match-date">
+                                <h3>{{ match.match_date.strftime('%d/%m/%Y') }}</h3>
+                                <h4>{{ match.match_date.strftime('%H:%M') }}</h4>
+                            </div>
+                        {% endif %}
+                        
+                        <p class="mt-2">{{ match.competition }}</p>
+                        <p>{{ match.stadium }}</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h5>{{ match.away_team.name }}</h5>
+                        {% if match.away_team.logo_url %}
+                            <img src="{{ match.away_team.logo_url }}" alt="{{ match.away_team.name }}" class="img-fluid" style="max-height: 100px;">
+                        {% else %}
+                            <div class="team-placeholder">{{ match.away_team.name[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if current_user.is_authenticated and match.status == 'pending' %}
+                    <div class="text-center mt-4">
+                        {% if user_prediction %}
+                            <div class="alert alert-info">
+                                <h5>Tu predicción: 
+                                    {% if user_prediction.prediction == 'local_win' %}
+                                        <span class="badge bg-success">Victoria {{ match.local_team.name }}</span>
+                                    {% elif user_prediction.prediction == 'draw' %}
+                                        <span class="badge bg-warning text-dark">Empate</span>
+                                    {% elif user_prediction.prediction == 'away_win' %}
+                                        <span class="badge bg-danger">Victoria {{ match.away_team.name }}</span>
+                                    {% endif %}
+                                </h5>
+                                <p>Confianza: {{ (user_prediction.confidence * 100)|round|int }}%</p>
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('predict', match_id=match.id) }}" class="btn btn-lg btn-success">
+                                <i class="bi bi-graph-up"></i> Realizar predicción
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if stats %}
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-bar-chart-line"></i> Estadísticas</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-center mb-4">Estadísticas del Partido</h5>
+                        <div class="stats-container">
+                            <div class="stat-row">
+                                <div class="stat-label">Posesión</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ stats.local_possession }}%">
+                                            {{ stats.local_possession }}%
+                                        </div>
+                                        <div class="progress-bar bg-danger" style="width: {{ stats.away_possession }}%">
+                                            {{ stats.away_possession }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Tiros</div>
+                                <div class="stat-value local">{{ stats.local_shots }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_shots / (stats.local_shots + stats.away_shots) * 100)|round|int }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_shots / (stats.local_shots + stats.away_shots) * 100)|round|int }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_shots }}</div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Tiros a puerta</div>
+                                <div class="stat-value local">{{ stats.local_shots_on_target }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_shots_on_target / (stats.local_shots_on_target + stats.away_shots_on_target) * 100)|round|int }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_shots_on_target / (stats.local_shots_on_target + stats.away_shots_on_target) * 100)|round|int }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_shots_on_target }}</div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Córners</div>
+                                <div class="stat-value local">{{ stats.local_corners }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_corners / (stats.local_corners + stats.away_corners) * 100)|round|int }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_corners / (stats.local_corners + stats.away_corners) * 100)|round|int }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_corners }}</div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Faltas</div>
+                                <div class="stat-value local">{{ stats.local_fouls }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_fouls / (stats.local_fouls + stats.away_fouls) * 100)|round|int }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_fouls / (stats.local_fouls + stats.away_fouls) * 100)|round|int }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_fouls }}</div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Tarjetas amarillas</div>
+                                <div class="stat-value local">{{ stats.local_yellow_cards }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_yellow_cards / (stats.local_yellow_cards + stats.away_yellow_cards) * 100)|round|int if (stats.local_yellow_cards + stats.away_yellow_cards) > 0 else 50 }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_yellow_cards / (stats.local_yellow_cards + stats.away_yellow_cards) * 100)|round|int if (stats.local_yellow_cards + stats.away_yellow_cards) > 0 else 50 }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_yellow_cards }}</div>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-label">Tarjetas rojas</div>
+                                <div class="stat-value local">{{ stats.local_red_cards }}</div>
+                                <div class="stat-bars">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: {{ (stats.local_red_cards / (stats.local_red_cards + stats.away_red_cards) * 100)|round|int if (stats.local_red_cards + stats.away_red_cards) > 0 else 50 }}%"></div>
+                                        <div class="progress-bar bg-danger" style="width: {{ (stats.away_red_cards / (stats.local_red_cards + stats.away_red_cards) * 100)|round|int if (stats.local_red_cards + stats.away_red_cards) > 0 else 50 }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="stat-value away">{{ stats.away_red_cards }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="text-center mb-4">Estadísticas Avanzadas</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h3 class="text-primary">{{ stats.local_expected_goals }}</h3>
+                                        <p>Expected Goals {{ match.local_team.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <h3 class="text-danger">{{ stats.away_expected_goals }}</h3>
+                                        <p>Expected Goals {{ match.away_team.name }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <canvas id="xgChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Análisis de Rendimiento</h5>
+                                <p>
+                                    {% if stats.local_expected_goals > stats.away_expected_goals %}
+                                        {{ match.local_team.name }} generó más oportunidades de gol (xG: {{ stats.local_expected_goals }}) que {{ match.away_team.name }} (xG: {{ stats.away_expected_goals }}).
+                                    {% elif stats.away_expected_goals > stats.local_expected_goals %}
+                                        {{ match.away_team.name }} generó más oportunidades de gol (xG: {{ stats.away_expected_goals }}) que {{ match.local_team.name }} (xG: {{ stats.local_expected_goals }}).
+                                    {% else %}
+                                        Ambos equipos generaron oportunidades similares de gol (xG: {{ stats.local_expected_goals }}).
+                                    {% endif %}
+                                    
+                                    {% if stats.local_shots_on_target > stats.away_shots_on_target %}
+                                        {{ match.local_team.name }} fue más preciso con {{ stats.local_shots_on_target }} tiros a puerta.
+                                    {% elif stats.away_shots_on_target > stats.local_shots_on_target %}
+                                        {{ match.away_team.name }} fue más preciso con {{ stats.away_shots_on_target }} tiros a puerta.
+                                    {% else %}
+                                        Ambos equipos tuvieron la misma precisión en los tiros a puerta.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-graph-up"></i> Predicciones</h4>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated and user_prediction %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Tu predicción</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3>
+                                        {% if user_prediction.prediction == 'local_win' %}
+                                            <span class="badge bg-success">Victoria {{ match.local_team.name }}</span>
+                                        {% elif user_prediction.prediction == 'draw' %}
+                                            <span class="badge bg-warning text-dark">Empate</span>
+                                        {% elif user_prediction.prediction == 'away_win' %}
+                                            <span class="badge bg-danger">Victoria {{ match.away_team.name }}</span>
+                                        {% endif %}
+                                    </h3>
+                                    <p>Confianza: {{ (user_prediction.confidence * 100)|round|int }}%</p>
+                                    
+                                    {% if match.status == 'finished' %}
+                                        <div class="mt-3">
+                                            {% if user_prediction.is_correct() %}
+                                                <div class="alert alert-success">
+                                                    <i class="bi bi-check-circle-fill"></i> ¡Predicción correcta!
+                                                </div>
+                                            {% else %}
+                                                <div class="alert alert-danger">
+                                                    <i class="bi bi-x-circle-fill"></i> Predicción incorrecta
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">Probabilidades</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="probabilityChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% elif match.status == 'pending' and current_user.is_authenticated %}
+                    <div class="text-center py-4">
+                        <p class="lead">Aún no has realizado una predicción para este partido.</p>
+                        <a href="{{ url_for('predict', match_id=match.id) }}" class="btn btn-lg btn-success">
+                            <i class="bi bi-graph-up"></i> Realizar predicción
+                        </a>
+                    </div>
+                {% elif not current_user.is_authenticated %}
+                    <div class="text-center py-4">
+                        <p class="lead">Inicia sesión para ver y realizar predicciones.</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">Iniciar sesión</a>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary">Registrarse</a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="lead">Las predicciones no están disponibles para este partido.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if stats %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // XG Chart
+        var xgCtx = document.getElementById('xgChart').getContext('2d');
+        var xgChart = new Chart(xgCtx, {
+            type: 'bar',
+            data: {
+                labels: ['{{ match.local_team.name }}', '{{ match.away_team.name }}'],
+                datasets: [{
+                    label: 'Expected Goals (xG)',
+                    data: [{{ stats.local_expected_goals }}, {{ stats.away_expected_goals }}],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Expected Goals (xG)'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+
+{% if current_user.is_authenticated and user_prediction %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Probability Chart
+        var probCtx = document.getElementById('probabilityChart').getContext('2d');
+        var probChart = new Chart(probCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Victoria {{ match.local_team.name }}', 'Empate', 'Victoria {{ match.away_team.name }}'],
+                datasets: [{
+                    label: 'Probabilidades',
+                    data: [
+                        {{ (user_prediction.probabilities|fromjson)['local_win'] * 100 }},
+                        {{ (user_prediction.probabilities|fromjson)['draw'] * 100 }},
+                        {{ (user_prediction.probabilities|fromjson)['away_win'] * 100 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Probabilidades de Resultado'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+<!-- web/templates/predict.html -->
+{% extends 'base.html' %}
+
+{% block title %}Realizar Predicción - Predictor Fútbol Premium{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-graph-up"></i> Realizar Predicción</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h5>{{ match.local_team.name }} vs {{ match.away_team.name }}</h5>
+                    <p>{{ match.competition }} | {{ match.match_date.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                
+                <div class="alert alert-info">
+                    <p><i class="bi bi-info-circle"></i> Nuestro sistema realizará un análisis del partido utilizando múltiples factores para generar una predicción precisa.</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('predict', match_id=match.id) }}">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary mb-3" role="status" id="loadingSpinner" style="display: none;">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <div id="predictionResult" class="mb-3" style="display: none;">
+                            <div class="alert alert-success">
+                                <h5 id="predictionText"></h5>
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div id="localBar" class="progress-bar bg-success" role="progressbar"></div>
+                                    <div id="drawBar" class="progress-bar bg-warning" role="progressbar"></div>
+                                    <div id="awayBar" class="progress-bar bg-danger" role="progressbar"></div>
+                                </div>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <p><strong>Victoria Local</strong></p>
+                                        <p id="localProb"></p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Empate</strong></p>
+                                        <p id="drawProb"></p>
+                                    </div>
+                                    <div class="col-4">
+                                        <p><strong>Victoria Visitante</strong></p>
+                                        <p id="awayProb"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-lg btn-success" id="predictBtn" onclick="showLoading()">
+                            <i class="bi bi-magic"></i> Generar Predicción
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-4">
+                    <h5>Factores analizados:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Rendimiento histórico</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Estadísticas head-to-head</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Ventaja local/visitante</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Lesiones de jugadores clave</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-group">
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Fatiga del equipo</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Factores meteorológicos</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Importancia del partido</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Expected Goals (xG)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

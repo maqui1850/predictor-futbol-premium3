@@ -1,174 +1,71 @@
+// backend/routes/api.js
 const express = require('express');
 const router = express.Router();
+const axios = require('axios'); // Usamos axios para hacer peticiones HTTP
 
-// Ruta de prueba
-router.get('/test', (req, res) => {
-  res.json({ message: 'La API está funcionando correctamente' });
-});
-
-// Ruta para obtener ligas
-router.get('/leagues', (req, res) => {
-  // En un entorno real, esto obtendría datos de una API externa o base de datos
-  // Por ahora, devolvemos datos de ejemplo
-  const leagues = [
-    { id: 1, name: 'Liga Española', country: 'España' },
-    { id: 2, name: 'Premier League', country: 'Inglaterra' },
-    { id: 3, name: 'Serie A', country: 'Italia' },
-    { id: 4, name: 'Bundesliga', country: 'Alemania' },
-    { id: 5, name: 'Ligue 1', country: 'Francia' }
-  ];
-  
-  res.json({ success: true, data: leagues });
-});
-
-// Ruta para obtener equipos por liga
-router.get('/teams/:leagueId', (req, res) => {
-  const { leagueId } = req.params;
-  
-  // Datos de ejemplo
-  const teams = {
-    '1': [ // Liga Española
-      { id: 101, name: 'Real Madrid', logo: 'assets/icons/team-placeholder.png' },
-      { id: 102, name: 'Barcelona', logo: 'assets/icons/team-placeholder.png' },
-      { id: 103, name: 'Atlético Madrid', logo: 'assets/icons/team-placeholder.png' },
-      { id: 104, name: 'Sevilla', logo: 'assets/icons/team-placeholder.png' }
-    ],
-    '2': [ // Premier League
-      { id: 201, name: 'Manchester City', logo: 'assets/icons/team-placeholder.png' },
-      { id: 202, name: 'Liverpool', logo: 'assets/icons/team-placeholder.png' },
-      { id: 203, name: 'Chelsea', logo: 'assets/icons/team-placeholder.png' },
-      { id: 204, name: 'Arsenal', logo: 'assets/icons/team-placeholder.png' }
-    ],
-    '3': [ // Serie A
-      { id: 301, name: 'Inter', logo: 'assets/icons/team-placeholder.png' },
-      { id: 302, name: 'Milan', logo: 'assets/icons/team-placeholder.png' },
-      { id: 303, name: 'Juventus', logo: 'assets/icons/team-placeholder.png' },
-      { id: 304, name: 'Roma', logo: 'assets/icons/team-placeholder.png' }
-    ],
-    '4': [ // Bundesliga
-      { id: 401, name: 'Bayern Munich', logo: 'assets/icons/team-placeholder.png' },
-      { id: 402, name: 'Borussia Dortmund', logo: 'assets/icons/team-placeholder.png' },
-      { id: 403, name: 'RB Leipzig', logo: 'assets/icons/team-placeholder.png' },
-      { id: 404, name: 'Bayer Leverkusen', logo: 'assets/icons/team-placeholder.png' }
-    ],
-    '5': [ // Ligue 1
-      { id: 501, name: 'PSG', logo: 'assets/icons/team-placeholder.png' },
-      { id: 502, name: 'Marseille', logo: 'assets/icons/team-placeholder.png' },
-      { id: 503, name: 'Lyon', logo: 'assets/icons/team-placeholder.png' },
-      { id: 504, name: 'Monaco', logo: 'assets/icons/team-placeholder.png' }
-    ]
-  };
-  
-  const leagueTeams = teams[leagueId] || [];
-  res.json({ success: true, data: leagueTeams });
-});
-
-// Ruta para obtener partidos por liga y fecha
-router.get('/fixtures/:leagueId/:date?', (req, res) => {
-  const { leagueId, date } = req.params;
-  
-  // En un entorno real, obtendríamos los partidos según la liga y fecha
-  // Por ahora, devolvemos datos de ejemplo
-  const fixtures = [
-    {
-      id: 1001,
-      date: new Date().toISOString(),
-      homeTeam: { id: 101, name: 'Real Madrid', logo: 'assets/icons/team-placeholder.png' },
-      awayTeam: { id: 102, name: 'Barcelona', logo: 'assets/icons/team-placeholder.png' },
-      league: { id: 1, name: 'Liga Española' }
-    },
-    {
-      id: 1002,
-      date: new Date().toISOString(),
-      homeTeam: { id: 103, name: 'Atlético Madrid', logo: 'assets/icons/team-placeholder.png' },
-      awayTeam: { id: 104, name: 'Sevilla', logo: 'assets/icons/team-placeholder.png' },
-      league: { id: 1, name: 'Liga Española' }
+// Función para generar predicciones
+async function generatePrediction(params) {
+  try {
+    console.log('Generando predicción con parámetros:', params);
+    
+    // Transformar parámetros para que coincidan con lo esperado por el backend
+    const transformedParams = {
+      local_team: params.equipoLocal || params.homeTeam,
+      away_team: params.equipoVisitante || params.awayTeam,
+      competition: params.liga || params.league,
+      // Añadir fecha si existe
+      ...(params.fecha && { match_date: params.fecha })
+    };
+    
+    console.log('Parámetros transformados:', transformedParams);
+    
+    // Supongamos que hay un servicio Python en esta URL
+    // Ajusta la URL según corresponda a tu configuración
+    const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5000/predict';
+    
+    const response = await axios.post(pythonServiceUrl, transformedParams);
+    const data = response.data;
+    
+    console.log('Respuesta del servidor Python:', data);
+    
+    // Manejar diferentes formatos de respuesta
+    if (data.prediction) {
+      return data.prediction;
+    } else if (data.datos) {
+      return data.datos;
+    } else {
+      console.warn('Formato de predicción no reconocido, devolviendo datos completos');
+      return data;
     }
-  ];
-  
-  res.json({ success: true, data: fixtures });
+  } catch (error) {
+    console.error("Error generando predicción:", error);
+    // Devolver un objeto con información del error
+    throw {
+      error: true,
+      message: error.message || "Error al generar la predicción",
+      details: "Verifica que el servidor Python esté funcionando correctamente"
+    };
+  }
+}
+
+// Ruta para manejar solicitudes de predicción
+router.post('/predict', async (req, res) => {
+  try {
+    const params = req.body;
+    const prediction = await generatePrediction(params);
+    res.json({ success: true, prediction });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || "Error desconocido",
+      details: error.details || "No hay detalles adicionales" 
+    });
+  }
 });
 
-// Ruta para generar predicciones
-router.get('/predict/:fixtureId', (req, res) => {
-  const { fixtureId } = req.params;
-  
-  // En un entorno real, se aplicarían algoritmos de análisis
-  // Por ahora, devolvemos una predicción de ejemplo
-  const prediction = {
-    fixtureId,
-    date: new Date().toISOString(),
-    homeTeam: { id: 101, name: 'Real Madrid' },
-    awayTeam: { id: 102, name: 'Barcelona' },
-    league: { id: 1, name: 'Liga Española' },
-    confidence: 7.5,
-    markets: {
-      '1x2': {
-        prediction: '1',
-        probabilities: { '1': 0.55, 'X': 0.25, '2': 0.20 },
-        odds: { '1': 1.82, 'X': 3.60, '2': 4.50 },
-        confidence: 7.2
-      },
-      'btts': {
-        prediction: 'Yes',
-        probabilities: { 'Yes': 0.65, 'No': 0.35 },
-        odds: { 'Yes': 1.75, 'No': 2.15 },
-        confidence: 6.8
-      },
-      'over_under': {
-        '1.5': {
-          prediction: 'Over',
-          probabilities: { 'Over': 0.80, 'Under': 0.20 },
-          odds: { 'Over': 1.25, 'Under': 3.50 },
-          confidence: 8.5
-        },
-        '2.5': {
-          prediction: 'Over',
-          probabilities: { 'Over': 0.60, 'Under': 0.40 },
-          odds: { 'Over': 1.85, 'Under': 1.95 },
-          confidence: 6.3
-        },
-        '3.5': {
-          prediction: 'Under',
-          probabilities: { 'Over': 0.35, 'Under': 0.65 },
-          odds: { 'Over': 3.10, 'Under': 1.45 },
-          confidence: 7.0
-        }
-      },
-      'corners': {
-        '8.5': {
-          prediction: 'Over',
-          probabilities: { 'Over': 0.70, 'Under': 0.30 },
-          odds: { 'Over': 1.65, 'Under': 2.25 },
-          confidence: 7.5
-        }
-      },
-      'cards': {
-        '4.5': {
-          prediction: 'Over',
-          probabilities: { 'Over': 0.60, 'Under': 0.40 },
-          odds: { 'Over': 1.80, 'Under': 2.00 },
-          confidence: 6.2
-        }
-      },
-      'asian_handicap': {
-        '-0.5': {
-          prediction: 'Home -0.5',
-          probabilities: { 'Home': 0.55, 'Away': 0.45 },
-          odds: { 'Home': 1.90, 'Away': 1.95 },
-          confidence: 5.8
-        }
-      }
-    },
-    recommendation: {
-      market: 'Over/Under 1.5',
-      selection: 'Over',
-      odds: 1.25,
-      confidence: 8.5
-    }
-  };
-  
-  res.json({ success: true, data: prediction });
+// Función de ayuda para verificar la salud del servicio
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Servicio de predicción funcionando correctamente' });
 });
 
 module.exports = router;

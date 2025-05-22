@@ -503,3 +503,115 @@
     }, 5000);
   }
 })();
+// Función para analizar partido
+document.addEventListener('DOMContentLoaded', function() {
+  const btnAnalizar = document.querySelector('button[id="btn-analizar-partido"]') || document.querySelector('.btn-analizar-partido');
+  
+  if (btnAnalizar) {
+    btnAnalizar.addEventListener('click', function() {
+      // Obtener valores de los campos
+      const homeTeam = document.querySelector('#equipo-local')?.value || document.querySelector('select[name="equipo-local"]')?.value;
+      const awayTeam = document.querySelector('#equipo-visitante')?.value || document.querySelector('select[name="equipo-visitante"]')?.value;
+      const league = document.querySelector('#liga')?.value || document.querySelector('select[name="liga"]')?.value || 'Liga Española';
+      const date = document.querySelector('#fecha')?.value || document.querySelector('input[name="fecha"]')?.value || new Date().toISOString().split('T')[0];
+      
+      if (!homeTeam || !awayTeam) {
+        alert('Por favor, selecciona los equipos local y visitante');
+        return;
+      }
+      
+      // Mostrar algún indicador de carga
+      const loadingElement = document.querySelector('.loading') || document.querySelector('.cargando');
+      if (loadingElement) loadingElement.style.display = 'block';
+      
+      // Enviar solicitud al backend
+      fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          homeTeam,
+          awayTeam,
+          league,
+          date
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Ocultar indicador de carga
+        if (loadingElement) loadingElement.style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar resultados
+          console.log('Resultados del análisis:', data.data);
+          
+          // Buscar un contenedor para mostrar los resultados
+          const resultadosContainer = document.querySelector('#resultados') || 
+                                     document.querySelector('.resultados') || 
+                                     document.querySelector('.prediccion-resultado');
+          
+          if (resultadosContainer) {
+            // Generar HTML con los resultados
+            let html = `
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  <h3>Resultado del Análisis</h3>
+                </div>
+                <div class="card-body">
+                  <h4>${data.data.equipo_local} vs ${data.data.equipo_visitante}</h4>
+                  <p class="text-muted">${data.data.fecha} - ${data.data.liga}</p>
+                  
+                  <div class="row mb-4">
+                    <div class="col-md-4 text-center">
+                      <div class="display-4">${(data.data.victoria_local * 100).toFixed(0)}%</div>
+                      <p>Victoria Local</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                      <div class="display-4">${(data.data.empate * 100).toFixed(0)}%</div>
+                      <p>Empate</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                      <div class="display-4">${(data.data.victoria_visitante * 100).toFixed(0)}%</div>
+                      <p>Victoria Visitante</p>
+                    </div>
+                  </div>
+                  
+                  <h5>Análisis</h5>
+                  <p>${data.data.analisis.local}</p>
+                  <p>${data.data.analisis.visitante}</p>
+                  <p><strong>${data.data.analisis.general}</strong></p>
+                  
+                  <h5>Predicciones Adicionales</h5>
+                  <ul>
+                    <li>Goles esperados ${data.data.equipo_local}: ${data.data.goles_esperados_local}</li>
+                    <li>Goles esperados ${data.data.equipo_visitante}: ${data.data.goles_esperados_visitante}</li>
+                    <li>Probabilidad Ambos Equipos Marcan: ${(data.data.mercados_adicionales.ambos_equipos_marcan * 100).toFixed(0)}%</li>
+                    <li>Probabilidad Más de 2.5 goles: ${(data.data.mercados_adicionales.mas_2_5_goles * 100).toFixed(0)}%</li>
+                  </ul>
+                </div>
+              </div>
+            `;
+            
+            resultadosContainer.innerHTML = html;
+          } else {
+            // Si no hay contenedor, mostrar una alerta con los resultados básicos
+            alert(`Predicción: ${data.data.equipo_local} (${(data.data.victoria_local * 100).toFixed(0)}%) vs ${data.data.equipo_visitante} (${(data.data.victoria_visitante * 100).toFixed(0)}%)`);
+          }
+        } else {
+          // Mostrar error
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        // Ocultar indicador de carga
+        if (loadingElement) loadingElement.style.display = 'none';
+        // Mostrar error
+        alert('Error al conectar con el servidor');
+        console.error(error);
+      });
+    });
+  } else {
+    console.warn('No se encontró el botón para analizar partido');
+  }
+});
