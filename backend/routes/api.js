@@ -1,71 +1,133 @@
 // backend/routes/api.js
 const express = require('express');
 const router = express.Router();
-const axios = require('axios'); // Usamos axios para hacer peticiones HTTP
 
-// Función para generar predicciones
-async function generatePrediction(params) {
-  try {
-    console.log('Generando predicción con parámetros:', params);
-    
-    // Transformar parámetros para que coincidan con lo esperado por el backend
-    const transformedParams = {
-      local_team: params.equipoLocal || params.homeTeam,
-      away_team: params.equipoVisitante || params.awayTeam,
-      competition: params.liga || params.league,
-      // Añadir fecha si existe
-      ...(params.fecha && { match_date: params.fecha })
-    };
-    
-    console.log('Parámetros transformados:', transformedParams);
-    
-    // Supongamos que hay un servicio Python en esta URL
-    // Ajusta la URL según corresponda a tu configuración
-    const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5000/predict';
-    
-    const response = await axios.post(pythonServiceUrl, transformedParams);
-    const data = response.data;
-    
-    console.log('Respuesta del servidor Python:', data);
-    
-    // Manejar diferentes formatos de respuesta
-    if (data.prediction) {
-      return data.prediction;
-    } else if (data.datos) {
-      return data.datos;
+// Importar controladores
+const apiController = require('../controllers/apiController');
+const predictionController = require('../controllers/predictionController');
+const advancedPredictionController = require('../controllers/advancedPredictionController');
+const scrapingController = require('../controllers/scrapingController');
+
+// Importar middleware de integración con Python
+const pythonIntegration = require('../middleware/pythonIntegration');
+
+// Rutas para acceso a datos de la API de fútbol
+router.get('/leagues', apiController.getLeagues);
+router.get('/teams/:leagueId', apiController.getTeamsByLeague);
+router.get('/fixtures/:leagueId/:date?', apiController.getFixturesByLeague);
+router.get('/fixture/:fixtureId', apiController.getFixtureById);
+router.get('/statistics/:fixtureId', apiController.getStatisticsByFixture);
+router.get('/h2h/:team1/:team2', apiController.getHeadToHead);
+
+// Rutas para acceso a datos mediante web scraping
+router.get('/scraping/leagues', scrapingController.getLeagues);
+router.get('/scraping/teams/:leagueId', scrapingController.getTeamsByLeague);
+router.get('/scraping/fixtures/:leagueId/:date?', scrapingController.getFixturesByLeague);
+router.get('/scraping/statistics/:fixtureId', scrapingController.getStatisticsByFixture);
+router.get('/scraping/h2h/:team1/:team2', scrapingController.getHeadToHead);
+
+// Rutas para predicciones
+
+// Ruta para predicción simple (siempre disponible)
+router.post('/predict/simple', predictionController.analyzeMatch);
+
+// Ruta para predicción avanzada (dirigida al servicio Python)
+router.post('/predict/advanced', advancedPredictionController.predictMatch);
+
+// Ruta inteligente que usa el modelo avanzado si está disponible o el simple como fallback
+router.post('/predict', 
+  pythonIntegration.routeToAdvancedModel,
+  pythonIntegration.verifyPythonAccess,
+  pythonIntegration.trackUsage,
+  (req, res, next) => {
+    if (req.useAdvancedModel && req.canAccessAdvancedModel) {
+      // Almacenar datos originales
+      req.predictionData = req.body;
+      // Usar controlador avanzado
+      advancedPredictionController.predictMatch(req, res, next);
     } else {
-      console.warn('Formato de predicción no reconocido, devolviendo datos completos');
-      return data;
+      // Usar controlador simple
+      predictionController.analyzeMatch(req, res, next);
     }
-  } catch (error) {
-    console.error("Error generando predicción:", error);
-    // Devolver un objeto con información del error
-    throw {
-      error: true,
-      message: error.message || "Error al generar la predicción",
-      details: "Verifica que el servidor Python esté funcionando correctamente"
-    };
   }
-}
+);
 
-// Ruta para manejar solicitudes de predicción
-router.post('/predict', async (req, res) => {
-  try {
-    const params = req.body;
-    const prediction = await generatePrediction(params);
-    res.json({ success: true, prediction });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      error: error.message || "Error desconocido",
-      details: error.details || "No hay detalles adicionales" 
-    });
-  }
-});
+// Rutas para métricas avanzadas
+router.get('/team/:teamId/metrics', 
+  pythonIntegration.verifyPythonAccess,
+  advancedPredictionController.getTeamMetrics
+);
+
+router.get('/team/name/:teamName/metrics', 
+  pythonIntegration.verifyPythonAccess,
+  advancedPredictionController.getTeamMetrics
+);
+
+router.get('/h2h/:team1Id/:team2Id/metrics', 
+  pythonIntegration.verifyPythonAccess,
+  advancedPredictionController.getH2HMetrics
+);
+
+// Ruta para verificar estado del servicio Python
+router.get('/python/status', advancedPredictionController.getServiceStatus);
 
 // Función de ayuda para verificar la salud del servicio
 router.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Servicio de predicción funcionando correctamente' });
+  res.json({ 
+    status: 'ok', 
+    message: 'Servicio de predicción funcionando correctamente',
+    version: process.env.APP_VERSION || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
+
+module.exports = router;// backend/routes/api.js
+const express = require('express');
+const router = express.Router();
+
+// Importar controladores
+const apiController = require('../controllers/apiController');
+const predictionController = require('../controllers/predictionController');
+const advancedPredictionController = require('../controllers/advancedPredictionController');
+const scrapingController = require('../controllers/scrapingController');
+
+// Rutas para acceso a datos de la API de fútbol
+router.get('/leagues', apiController.getLeagues);
+router.get('/teams/:leagueId', apiController.getTeamsByLeague);
+router.get('/fixtures/:leagueId/:date?', apiController.getFixturesByLeague);
+router.get('/fixture/:fixtureId', apiController.getFixtureById);
+router.get('/statistics/:fixtureId', apiController.getStatisticsByFixture);
+router.get('/h2h/:team1/:team2', apiController.getHeadToHead);
+
+// Rutas para acceso a datos mediante web scraping
+router.get('/scraping/leagues', scrapingController.getLeagues);
+router.get('/scraping/teams/:leagueId', scrapingController.getTeamsByLeague);
+router.get('/scraping/fixtures/:leagueId/:date?', scrapingController.getFixturesByLeague);
+router.get('/scraping/statistics/:fixtureId', scrapingController.getStatisticsByFixture);
+router.get('/scraping/h2h/:team1/:team2', scrapingController.getHeadToHead);
+
+// Rutas para predicciones
+router.post('/predict/simple', predictionController.analyzeMatch);
+router.post('/predict/advanced', advancedPredictionController.predictMatch);
+
+// Rutas para métricas avanzadas
+router.get('/team/:teamId/metrics', advancedPredictionController.getTeamMetrics);
+router.get('/team/name/:teamName/metrics', advancedPredictionController.getTeamMetrics);
+router.get('/h2h/:team1Id/:team2Id/metrics', advancedPredictionController.getH2HMetrics);
+
+// Ruta para verificar estado del servicio Python
+router.get('/python/status', advancedPredictionController.getServiceStatus);
+
+// Función de ayuda para verificar la salud del servicio
+router.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Servicio de predicción funcionando correctamente',
+    version: process.env.APP_VERSION || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = router;

@@ -1,0 +1,265 @@
+<!-- frontend/advanced-prediction.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictor de Fútbol Premium - Predicción Avanzada</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Estilos adicionales para la página de predicción avanzada */
+        .prediction-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .probability-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            font-weight: bold;
+            font-size: 1.5rem;
+            background-color: #f8f9fa;
+            border: 5px solid #e9ecef;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #007bff;
+            background-color: transparent;
+            border-bottom: 3px solid #007bff;
+        }
+        
+        .model-switch {
+            margin-top: -5px;
+        }
+        
+        .badge {
+            font-size: 85%;
+            padding: 0.4em 0.7em;
+        }
+        
+        /* Estilo para el estado del servicio */
+        .service-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-futbol me-2"></i> Predictor de Fútbol Premium
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="advanced-prediction.html">Predicción Avanzada</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics.html">Estadísticas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">Acerca de</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i> Predicción Avanzada
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">
+                            Utiliza nuestro sistema de predicción avanzada basado en Machine Learning para obtener 
+                            análisis detallados y pronósticos precisos para cualquier partido de fútbol.
+                        </p>
+                        
+                        <div class="model-status alert alert-info d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-robot me-2"></i>
+                                <strong>Modelo avanzado:</strong> 
+                                <span id="python-service-status" class="badge bg-secondary">Verificando...</span>
+                            </div>
+                            <div id="service-performance" class="text-muted">
+                                <small>Cargando métricas...</small>
+                            </div>
+                        </div>
+                        
+                        <form id="prediction-form" class="mt-4">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="league" class="form-label">Liga</label>
+                                    <select class="form-select" id="league" name="league" required>
+                                        <option value="" selected disabled>Seleccionar liga</option>
+                                        <option value="La Liga">La Liga (España)</option>
+                                        <option value="Premier League">Premier League (Inglaterra)</option>
+                                        <option value="Serie A">Serie A (Italia)</option>
+                                        <option value="Bundesliga">Bundesliga (Alemania)</option>
+                                        <option value="Ligue 1">Ligue 1 (Francia)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="date" class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="date" name="date" 
+                                           value="" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="fixture-id" class="form-label">ID Partido (Opcional)</label>
+                                    <input type="text" class="form-control" id="fixture-id" name="fixtureId" 
+                                           placeholder="ID numérico">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-5">
+                                    <label for="homeTeam" class="form-label">Equipo Local</label>
+                                    <input type="text" class="form-control" id="homeTeam" name="homeTeam" 
+                                           placeholder="Equipo local" required>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end justify-content-center">
+                                    <span class="fw-bold mb-3">VS</span>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="awayTeam" class="form-label">Equipo Visitante</label>
+                                    <input type="text" class="form-control" id="awayTeam" name="awayTeam" 
+                                           placeholder="Equipo visitante" required>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-magic me-2"></i> Generar Predicción
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Indicador de carga -->
+                <div id="loading-indicator" style="display: none;" class="text-center my-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Analizando datos y generando predicción...</p>
+                </div>
+                
+                <!-- Contenedor de errores -->
+                <div id="error-container" style="display: none;" class="my-4"></div>
+                
+                <!-- Resultados de la predicción -->
+                <div id="prediction-result" style="display: none;" class="mb-4"></div>
+                
+                <!-- Indicador de confianza -->
+                <div id="confidence-indicator" class="mb-4"></div>
+                
+                <!-- Pestañas de mercados -->
+                <div id="markets-tabs" class="mb-4"></div>
+                
+                <!-- Gráfico de predicción -->
+                <div id="prediction-chart" class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Gráfico de Predicción</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="prediction-canvas"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas de equipos -->
+                <div id="team-stats-container" class="mb-4"></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Estado del servicio -->
+    <div class="service-status">
+        <small>
+            <i class="fas fa-server me-1"></i> Estado del servicio: 
+            <span id="service-status-indicator" class="badge bg-secondary">Verificando...</span>
+        </small>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    <script src="js/advancedPrediction.js"></script>
+    
+    <script>
+        // Inicializar fecha actual
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            document.getElementById('date').value = dateStr;
+            
+            // Sincronizar estado del servicio
+            const pythonStatus = document.getElementById('python-service-status');
+            const serviceStatus = document.getElementById('service-status-indicator');
+            
+            // Observador para cambios en el estado
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        serviceStatus.className = pythonStatus.className;
+                        serviceStatus.textContent = pythonStatus.textContent;
+                    }
+                });
+            });
+            
+            // Configurar observador
+            observer.observe(pythonStatus, { attributes: true });
+        });
+    </script>
+</body>
+</html>

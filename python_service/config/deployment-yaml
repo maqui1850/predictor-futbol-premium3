@@ -1,0 +1,243 @@
+# python_service/config/deployment.yaml
+
+# Configuración para desarrollo y producción
+environments:
+  development:
+    # Configuración general
+    debug: true
+    log_level: DEBUG
+    testing: true
+    
+    # Servidor
+    host: 0.0.0.0
+    port: 5000
+    workers: 1
+    
+    # Base de datos
+    database:
+      type: sqlite
+      path: ./data/predictor_dev.db
+    
+    # Cache
+    cache:
+      type: simple
+      timeout: 300  # 5 minutos
+    
+    # Modelos
+    models:
+      save_path: ./models/saved
+      fallback_enabled: true
+      confidence_threshold: 4.0
+      
+    # API Externa
+    api_football:
+      base_url: https://api-football-v1.p.rapidapi.com/v3
+      cache_timeout: 3600  # 1 hora
+  
+  production:
+    # Configuración general
+    debug: false
+    log_level: INFO
+    testing: false
+    
+    # Servidor
+    host: 0.0.0.0
+    port: 5000
+    workers: 4
+    
+    # Base de datos
+    database:
+      type: postgresql
+      host: ${DB_HOST}
+      port: ${DB_PORT}
+      name: ${DB_NAME}
+      user: ${DB_USER}
+      password: ${DB_PASSWORD}
+    
+    # Cache
+    cache:
+      type: redis
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      timeout: 1800  # 30 minutos
+    
+    # Modelos
+    models:
+      save_path: /app/models/saved
+      fallback_enabled: true
+      confidence_threshold: 5.0
+      
+    # API Externa
+    api_football:
+      base_url: https://api-football-v1.p.rapidapi.com/v3
+      cache_timeout: 7200  # 2 horas
+
+# Configuración de modelo predictivo
+model:
+  # Parámetros generales
+  name: gradient_boosting_v2
+  version: 2.0
+  
+  # Entrenamiento
+  training:
+    test_size: 0.2
+    random_state: 42
+    cv_folds: 5
+    
+  # Parámetros de Gradient Boosting
+  params:
+    n_estimators: 200
+    learning_rate: 0.1
+    max_depth: 5
+    min_samples_split: 10
+    min_samples_leaf: 4
+    subsample: 0.8
+    
+  # Optimización de hiperparámetros
+  hyperopt:
+    enabled: true
+    max_evals: 100
+    space:
+      n_estimators: [100, 150, 200, 250, 300]
+      learning_rate: [0.01, 0.05, 0.1, 0.2]
+      max_depth: [3, 4, 5, 6, 7]
+      min_samples_split: [5, 10, 15, 20]
+      min_samples_leaf: [2, 4, 6, 8]
+      subsample: [0.6, 0.7, 0.8, 0.9, 1.0]
+      
+  # Características
+  features:
+    - team_form
+    - home_advantage
+    - h2h_history
+    - goals_scored_avg
+    - goals_conceded_avg
+    - clean_sheets_rate
+    - win_rate
+    - btts_rate
+    - over25_rate
+    - cards_avg
+    - corners_avg
+    - xg_performance
+    
+  # Mercados para predicción
+  markets:
+    - 1x2
+    - btts
+    - over_under
+    - handicap
+    - corners
+    - cards
+
+# Configuración de API
+api:
+  # General
+  version: v1
+  prefix: /api
+  
+  # Seguridad
+  auth:
+    enabled: true
+    api_key_header: X-API-Key
+    jwt_enabled: false
+    
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    limit: 100
+    window: 3600  # 1 hora
+    
+  # CORS
+  cors:
+    enabled: true
+    origins: 
+      - http://localhost:3000
+      - https://predictor-futbol-premium.com
+    
+  # Documentación
+  docs:
+    enabled: true
+    title: Predictor de Fútbol Premium API
+    description: API para predicciones avanzadas de fútbol
+    version: 1.0.0
+
+# Configuración de logging
+logging:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    json:
+      format: '{"time": "%(asctime)s", "name": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: standard
+      stream: ext://sys.stdout
+    file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: json
+      filename: /var/log/predictor/app.log
+      maxBytes: 10485760  # 10 MB
+      backupCount: 5
+  loggers:
+    '':  # root logger
+      handlers: [console, file]
+      level: INFO
+      propagate: true
+    app:
+      handlers: [console, file]
+      level: INFO
+      propagate: false
+    models:
+      handlers: [console, file]
+      level: INFO
+      propagate: false
+    api:
+      handlers: [console, file]
+      level: INFO
+      propagate: false
+
+# Configuración de métricas y monitoreo
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    endpoint: /metrics
+  health_check:
+    enabled: true
+    endpoint: /health
+  profiling:
+    enabled: false
+
+# Configuración de despliegue
+deployment:
+  # Docker
+  docker:
+    base_image: python:3.9-slim
+    working_dir: /app
+    expose_port: 5000
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./logs:/var/log/predictor
+    env_file: .env
+    
+  # Gunicorn
+  gunicorn:
+    workers: 4
+    worker_class: sync
+    timeout: 120
+    keep_alive: 5
+    
+  # Nginx (para producción)
+  nginx:
+    enabled: true
+    port: 80
+    server_name: api.predictor-futbol-premium.com
+    client_max_body_size: 10M
+    proxy_read_timeout: 120s
