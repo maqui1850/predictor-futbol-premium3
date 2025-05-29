@@ -1,0 +1,224 @@
+# python_service/config/data_sources.yaml
+
+# Configuración de fuentes de datos para el fetcher histórico
+
+data_sources:
+  # API-Football (Premium - requiere suscripción)
+  api_football:
+    enabled: true
+    base_url: "https://api-football-v1.p.rapidapi.com/v3"
+    rate_limit: 100  # requests per minute
+    headers:
+      x-rapidapi-host: "api-football-v1.p.rapidapi.com"
+    advantages:
+      - "Datos oficiales y precisos"
+      - "Estadísticas detalladas por partido"
+      - "Actualizaciones en tiempo real"
+      - "Cobertura mundial completa"
+    limitations:
+      - "Requiere suscripción de pago"
+      - "Límites de requests por minuto"
+  
+  # Football-Data.co.uk (Gratuito)
+  football_data:
+    enabled: true
+    base_url: "https://www.football-data.co.uk"
+    rate_limit: null  # Sin límite específico
+    advantages:
+      - "Completamente gratuito"
+      - "Datos históricos desde 1993"
+      - "Incluye estadísticas de apuestas"
+      - "Formato CSV fácil de procesar"
+    limitations:
+      - "Solo ligas europeas principales"
+      - "Menos estadísticas que APIs premium"
+      - "No actualizado en tiempo real"
+  
+  # Kaggle Datasets (Gratuito)
+  kaggle:
+    enabled: false
+    datasets:
+      - "hugomathien/soccer"
+      - "secareanualin/football-events"
+    advantages:
+      - "Datasets grandes y curados"
+      - "Datos históricos extensos"
+      - "Formatos optimizados para ML"
+    limitations:
+      - "Requiere descarga manual"
+      - "Datos pueden estar desactualizados"
+      - "Formatos heterogéneos"
+
+# Configuración de ligas soportadas
+leagues:
+  # Premier League (Inglaterra)
+  premier_league:
+    name: "Premier League"
+    country: "England"
+    api_football_id: 39
+    football_data_code: "E0"
+    seasons_available: [2000, 2024]
+    teams_count: 20
+    
+  # La Liga (España)
+  la_liga:
+    name: "La Liga"
+    country: "Spain"
+    api_football_id: 140
+    football_data_code: "SP1"
+    seasons_available: [1996, 2024]
+    teams_count: 20
+    
+  # Bundesliga (Alemania)
+  bundesliga:
+    name: "Bundesliga"
+    country: "Germany"
+    api_football_id: 78
+    football_data_code: "D1"
+    seasons_available: [1993, 2024]
+    teams_count: 18
+    
+  # Serie A (Italia)
+  serie_a:
+    name: "Serie A"
+    country: "Italy"
+    api_football_id: 135
+    football_data_code: "I1"
+    seasons_available: [1993, 2024]
+    teams_count: 20
+    
+  # Ligue 1 (Francia)
+  ligue_1:
+    name: "Ligue 1"
+    country: "France"
+    api_football_id: 61
+    football_data_code: "F1"
+    seasons_available: [1993, 2024]
+    teams_count: 20
+    
+  # Champions League
+  champions_league:
+    name: "Champions League"
+    country: "Europe"
+    api_football_id: 2
+    football_data_code: null
+    seasons_available: [1992, 2024]
+    teams_count: 32  # variable por fase
+    
+  # Europa League
+  europa_league:
+    name: "Europa League"
+    country: "Europe"
+    api_football_id: 3
+    football_data_code: null
+    seasons_available: [2009, 2024]
+    teams_count: 32
+
+# Configuración de temporadas
+seasons:
+  # Temporadas recomendadas para entrenamiento
+  training_seasons: [2020, 2021, 2022, 2023]
+  
+  # Temporada actual para validación
+  validation_season: 2024
+  
+  # Rango completo disponible
+  available_range: [1993, 2024]
+
+# Configuración de características a extraer
+features:
+  # Características básicas (siempre disponibles)
+  basic:
+    - match_id
+    - date
+    - season
+    - league
+    - home_team
+    - away_team
+    - home_goals
+    - away_goals
+    - result
+    - total_goals
+    
+  # Características de estadísticas de partido
+  match_stats:
+    - home_shots
+    - away_shots
+    - home_shots_on_target
+    - away_shots_on_target
+    - home_corners
+    - away_corners
+    - home_fouls
+    - away_fouls
+    - home_yellow_cards
+    - away_yellow_cards
+    - home_red_cards
+    - away_red_cards
+    - home_possession
+    - away_possession
+    
+  # Características avanzadas (solo API premium)
+  advanced:
+    - home_xg  # Expected goals
+    - away_xg
+    - home_passes
+    - away_passes
+    - home_pass_accuracy
+    - away_pass_accuracy
+    - home_offsides
+    - away_offsides
+    - home_saves
+    - away_saves
+
+# Configuración de procesamiento
+processing:
+  # Filtros de calidad de datos
+  filters:
+    min_goals: 0
+    max_goals: 15
+    exclude_friendlies: true
+    exclude_playoffs: false
+    min_season: 2000
+    
+  # Validación de datos
+  validation:
+    check_duplicates: true
+    check_missing_values: true
+    check_date_format: true
+    check_team_names: true
+    
+  # Transformaciones
+  transformations:
+    normalize_team_names: true
+    standardize_dates: true
+    add_derived_features: true
+    
+# Configuración de almacenamiento
+storage:
+  # Formatos de salida
+  formats:
+    csv:
+      enabled: true
+      separator: ","
+      encoding: "utf-8"
+    
+    json:
+      enabled: false
+      indent: 2
+    
+    parquet:
+      enabled: false
+      compression: "snappy"
+  
+  # Estructura de archivos
+  file_structure:
+    single_file: true  # Un archivo vs archivos separados por liga/temporada
+    include_metadata: true
+    backup_enabled: true
+    
+# Configuración de logging
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/data_fetcher.log"
+  console: true

@@ -1,0 +1,46 @@
+================================================================================
+INFORME DE VALIDACIÓN DEL MODELO DE PREDICCIÓN DE FÚTBOL
+================================================================================
+
+Fecha de generación: 2025-05-29 09:39:22
+
+MÉTRICAS DEL MODELO ORIGINAL:
+----------------------------------------
+Accuracy: 0.4441
+Precision: 0.4080
+Recall: 0.4441
+F1_score: 0.4148
+
+
+CARACTERÍSTICAS UTILIZADAS:
+----------------------------------------
+1. home_team_encoded
+2. away_team_encoded
+3. league_encoded
+4. home_shots_on_target
+5. away_shots_on_target
+6. home_corners
+7. away_corners
+8. home_fouls
+9. away_fouls
+10. home_yellow_cards
+11. away_yellow_cards
+12. home_red_cards
+13. away_red_cards
+14. shots_difference
+15. corners_difference
+16. fouls_difference
+17. home_win_rate
+18. home_draw_rate
+19. away_win_rate
+20. away_draw_rate
+21. win_rate_difference
+
+
+RECOMENDACIONES PARA MEJORA:
+----------------------------------------
+1. Agregar más datos históricos (3+ temporadas)
+2. Incluir estadísticas de forma reciente
+3. Considerar factores externos (lesiones, clima)
+4. Implementar ensemble de modelos
+5. Ajustar hiperparámetros con búsqueda bayesiana

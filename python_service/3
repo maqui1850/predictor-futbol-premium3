@@ -1,0 +1,132 @@
+[
+  {
+    "match": "Real Madrid vs Barcelona",
+    "league": "La Liga",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.15593457045364129,
+      "D": 0.3290225333727034,
+      "H": 0.5150428961736554
+    },
+    "confidence": 0.5150428961736554,
+    "timestamp": "2025-05-29T09:33:50.337239"
+  },
+  {
+    "match": "Manchester United vs Liverpool",
+    "league": "Premier League",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.03466820200013743,
+      "D": 0.032199610275673626,
+      "H": 0.9331321877241888
+    },
+    "confidence": 0.9331321877241888,
+    "timestamp": "2025-05-29T09:33:50.358227"
+  },
+  {
+    "match": "Chelsea vs Arsenal",
+    "league": "Premier League",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.06844776631393985,
+      "D": 0.06491007149639927,
+      "H": 0.8666421621896608
+    },
+    "confidence": 0.8666421621896608,
+    "timestamp": "2025-05-29T09:33:50.380567"
+  },
+  {
+    "match": "Atletico Madrid vs Valencia",
+    "league": "La Liga",
+    "prediction": "A",
+    "prediction_name": "Victoria Visitante",
+    "probabilities": {
+      "A": 0.5681493640229928,
+      "D": 0.14119608652548932,
+      "H": 0.2906545494515179
+    },
+    "confidence": 0.5681493640229928,
+    "timestamp": "2025-05-29T09:33:50.406491"
+  },
+  {
+    "match": "Manchester City vs Tottenham",
+    "league": "Premier League",
+    "prediction": "A",
+    "prediction_name": "Victoria Visitante",
+    "probabilities": {
+      "A": 0.5837649058283415,
+      "D": 0.23368706470662298,
+      "H": 0.1825480294650355
+    },
+    "confidence": 0.5837649058283415,
+    "timestamp": "2025-05-29T09:33:50.424738"
+  },
+  {
+    "match": "Sevilla vs Real Sociedad",
+    "league": "La Liga",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.1194500732367794,
+      "D": 0.17168235574878613,
+      "H": 0.7088675710144344
+    },
+    "confidence": 0.7088675710144344,
+    "timestamp": "2025-05-29T09:33:50.437926"
+  },
+  {
+    "match": "Leicester vs Everton",
+    "league": "Premier League",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.10911777657507195,
+      "D": 0.03644903138243798,
+      "H": 0.8544331920424901
+    },
+    "confidence": 0.8544331920424901,
+    "timestamp": "2025-05-29T09:33:50.454672"
+  },
+  {
+    "match": "Villarreal vs Real Betis",
+    "league": "La Liga",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.0560548454810558,
+      "D": 0.015526460064529719,
+      "H": 0.9284186944544145
+    },
+    "confidence": 0.9284186944544145,
+    "timestamp": "2025-05-29T09:33:50.468297"
+  },
+  {
+    "match": "West Ham vs Newcastle",
+    "league": "Premier League",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.09773667362933404,
+      "D": 0.03796246176482379,
+      "H": 0.8643008646058422
+    },
+    "confidence": 0.8643008646058422,
+    "timestamp": "2025-05-29T09:33:50.473957"
+  },
+  {
+    "match": "Athletic Bilbao vs Espanyol",
+    "league": "La Liga",
+    "prediction": "H",
+    "prediction_name": "Victoria Local",
+    "probabilities": {
+      "A": 0.25189703016178283,
+      "D": 0.24994389894016397,
+      "H": 0.4981590708980532
+    },
+    "confidence": 0.4981590708980532,
+    "timestamp": "2025-05-29T09:33:50.488763"
+  }
+]
