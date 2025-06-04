@@ -1,42 +1,56 @@
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan');
 const path = require('path');
-require('dotenv').config();
 
-// Importar rutas
-const apiRoutes = require('./routes/api');
-const webRoutes = require('./routes/web');
-
-// Inicializar app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Middleware
+// Configuracion
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-
-// Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Configuración de rutas
-app.use('/api', apiRoutes);
-app.use('/', webRoutes);
+// Ruta principal
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
-// Manejador de errores
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Error interno del servidor',
-    error: process.env.NODE_ENV === 'development' ? err.message : {}
-  });
+// API de salud
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Predictor de Futbol funcionando',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// API de prediccion simple
+app.post('/api/predict', (req, res) => {
+    const { homeTeam, awayTeam, league } = req.body;
+ECHO est� desactivado.
+    // Prediccion basica simulada
+    const prediction = {
+        success: true,
+        data: {
+            victoria_local: 0.55,
+            empate: 0.25,
+            victoria_visitante: 0.20,
+            goles_esperados_local: 1.8,
+            goles_esperados_visitante: 1.1,
+            confianza: "alta",
+            analisis: {
+                local: `${homeTeam} tiene ventaja como local`,
+                visitante: `${awayTeam} jugara de visitante`,
+                general: "Partido equilibrado con ligera ventaja local"
+            }
+        }
+    };
+ECHO est� desactivado.
+    res.json(prediction);
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📊 Modo: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log('🎯 Abre tu navegador y ve a esa direccion');
 });
