@@ -3,134 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor de Futbol Premium</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Predictor de Fútbol Premium</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos personalizados -->
     <style>
-        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .prediction-card { transition: transform 0.3s ease; }
-        .prediction-card:hover { transform: translateY(-5px); }
-        .confidence-high { border-left: 4px solid #28a745; }
-        .confidence-medium { border-left: 4px solid #ffc107; }
-        .confidence-low { border-left: 4px solid #dc3545; }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .prediction-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .confidence-high {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(45deg, #d4edda, #f8f9fa);
+        }
+        .confidence-medium {
+            border-left: 4px solid #ffc107;
+            background: linear-gradient(45deg, #fff3cd, #f8f9fa);
+        }
+        .confidence-low {
+            border-left: 4px solid #dc3545;
+            background: linear-gradient(45deg, #f8d7da, #f8f9fa);
+        }
+        .vs-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .loading {
+            opacity: 0.7;
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto;
+        }
+        .match-meta-item {
+            margin: 0 15px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="fas fa-futbol me-2"></i>
-                Predictor de Futbol Premium
+                <span>Predictor de Fútbol Premium</span>
             </a>
-            <div class="ms-auto">
-                <span class="badge bg-success">🤖 IA Activada</span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.debugPredictor()">Debug</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.testPrediction()">Test</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center ms-3">
+                    <span class="badge bg-success">🤖 IA Activada</span>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <div class="hero-section py-5">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">Predicciones Premium de Futbol</h1>
-            <p class="lead">Inteligencia Artificial avanzada para predecir resultados de futbol</p>
-        </div>
-    </div>
-
-    <!-- Formulario -->
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="fas fa-search me-2"></i>Analizar Partido</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="prediction-form">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Liga</label>
-                                    <select id="league" class="form-select" required>
-                                        <option value="">Selecciona liga</option>
-                                        <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
-                                        <option value="La Liga">🇪🇸 La Liga</option>
-                                        <option value="Bundesliga">🇩🇪 Bundesliga</option>
-                                        <option value="Serie A">🇮🇹 Serie A</option>
-                                        <option value="Ligue 1">🇫🇷 Ligue 1</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Fecha</label>
-                                    <input type="date" id="date" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Equipo Local</label>
-                                    <input type="text" id="homeTeam" class="form-control" placeholder="Ej: Real Madrid" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Equipo Visitante</label>
-                                    <input type="text" id="awayTeam" class="form-control" placeholder="Ej: Barcelona" required>
-                                </div>
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-chart-line me-2"></i>Generar Prediccion
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">Predicciones Premium de Fútbol</h1>
+                    <p class="lead">Inteligencia Artificial avanzada para predecir resultados de fútbol</p>
+                    <p class="text-light">Algoritmos de Machine Learning para los mercados más populares</p>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="fas fa-brain fa-5x mb-3"></i>
+                    <p class="h5">Predicciones con IA</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Resultados -->
-    <div id="results" class="container my-5" style="display: none;">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Prediccion Generada</h4>
+    <!-- Formulario de análisis -->
+    <div class="container my-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-search me-2"></i>Analizar Partido</h4>
             </div>
             <div class="card-body">
-                <div id="match-info" class="text-center mb-4">
-                    <h3><span id="home-name"></span> vs <span id="away-name"></span></h3>
-                    <p class="text-muted"><span id="league-name"></span> - <span id="match-date"></span></p>
-                </div>
-ECHO est� desactivado.
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="prediction-card card h-100 confidence-high">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">🏠 Victoria Local</h5>
-                                <h2 id="home-prob" class="text-success">55%</h2>
-                                <p class="card-text">Probabilidad de que gane el equipo local</p>
+                <div id="error-container" class="d-none"></div>
+                
+                <form id="analysis-form" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="league-select" class="form-label">Liga</label>
+                        <select id="league-select" class="form-select" required>
+                            <option value="" selected>Selecciona una liga</option>
+                            <!-- Opciones cargadas dinámicamente por JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="date-input" class="form-label">Fecha</label>
+                        <input type="date" id="date-input" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="home-team-select" class="form-label">Equipo Local</label>
+                        <input type="text" id="home-team-select" class="form-control" 
+                               placeholder="Ej: Real Madrid" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="away-team-select" class="form-label">Equipo Visitante</label>
+                        <input type="text" id="away-team-select" class="form-control" 
+                               placeholder="Ej: Barcelona" required>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="button" id="reset-btn" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-redo me-1"></i> Reiniciar
+                        </button>
+                        <button type="submit" id="analyze-btn" class="btn btn-primary btn-lg">
+                            <i class="fas fa-chart-line me-1"></i> Generar Predicción
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de resultados -->
+    <div id="prediction-container" class="container my-5 d-none">
+        <!-- Información del partido -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Partido</h4>
+            </div>
+            <div class="card-body">
+                <div id="match-info" class="row align-items-center">
+                    <div class="col-md-5 text-center text-md-end">
+                        <div class="team-info">
+                            <img id="home-team-logo" src="" alt="Logo equipo local" class="team-logo mb-2 d-none">
+                            <h3 id="home-team-name" class="team-name">Equipo Local</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center my-3 my-md-0">
+                        <span class="vs-badge">VS</span>
+                    </div>
+                    <div class="col-md-5 text-center text-md-start">
+                        <div class="team-info">
+                            <img id="away-team-logo" src="" alt="Logo equipo visitante" class="team-logo mb-2 d-none">
+                            <h3 id="away-team-name" class="team-name">Equipo Visitante</h3>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="d-flex flex-wrap justify-content-center text-center match-meta">
+                            <div class="match-meta-item">
+                                <i class="far fa-calendar-alt text-primary me-1"></i>
+                                <span id="match-date">Fecha</span>
+                            </div>
+                            <div class="match-meta-item">
+                                <i class="fas fa-trophy text-primary me-1"></i>
+                                <span id="league-name">Liga</span>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados de predicción -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Predicción 1X2</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <!-- Victoria Local -->
                     <div class="col-md-4">
                         <div class="prediction-card card h-100 confidence-medium">
                             <div class="card-body text-center">
-                                <h5 class="card-title">🤝 Empate</h5>
-                                <h2 id="draw-prob" class="text-warning">25%</h2>
-                                <p class="card-text">Probabilidad de empate</p>
+                                <div class="mb-3">
+                                    <i class="fas fa-home fa-2x text-success"></i>
+                                </div>
+                                <h5 class="card-title">🏠 Victoria Local</h5>
+                                <h2 id="home-prob" class="text-success mb-3">--%</h2>
+                                <p class="card-text small">Probabilidad de que gane el equipo local</p>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Empate -->
                     <div class="col-md-4">
-                        <div class="prediction-card card h-100 confidence-low">
+                        <div class="prediction-card card h-100 confidence-medium">
                             <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-handshake fa-2x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">🤝 Empate</h5>
+                                <h2 id="draw-prob" class="text-warning mb-3">--%</h2>
+                                <p class="card-text small">Probabilidad de empate</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Victoria Visitante -->
+                    <div class="col-md-4">
+                        <div class="prediction-card card h-100 confidence-medium">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-plane fa-2x text-danger"></i>
+                                </div>
                                 <h5 class="card-title">✈️ Victoria Visitante</h5>
-                                <h2 id="away-prob" class="text-danger">20%</h2>
-                                <p class="card-text">Probabilidad de que gane el visitante</p>
+                                <h2 id="away-prob" class="text-danger mb-3">--%</h2>
+                                <p class="card-text small">Probabilidad de que gane el visitante</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Análisis de IA -->
                 <div class="mt-4">
-                    <div class="card">
+                    <div class="card border-info">
                         <div class="card-body">
-                            <h5><i class="fas fa-lightbulb me-2"></i>Analisis de IA</h5>
-                            <p id="analysis-text" class="mb-0">Cargando analisis...</p>
+                            <h5 class="card-title">
+                                <i class="fas fa-lightbulb me-2 text-warning"></i>
+                                Análisis de Inteligencia Artificial
+                            </h5>
+                            <p id="analysis-text" class="mb-0 lead">
+                                Cargando análisis de IA...
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -138,63 +268,119 @@ ECHO est� desactivado.
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Configurar fecha de hoy
-        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    <!-- Sección de características -->
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Tecnología Avanzada</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon bg-primary text-white mb-3">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h5 class="card-title">Inteligencia Artificial</h5>
+                        <p class="card-text">Algoritmos de Machine Learning entrenados con miles de partidos históricos para predicciones precisas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon bg-primary text-white mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="card-title">Análisis Estadístico</h5>
+                        <p class="card-text">Procesamiento de estadísticas avanzadas: forma reciente, head-to-head, y factores contextuales.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="feature-icon bg-primary text-white mb-3">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h5 class="card-title">Respuesta Rápida</h5>
+                        <p class="card-text">Predicciones generadas en tiempo real con sistema de fallback para máxima disponibilidad.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // Manejar formulario
-        document.getElementById('prediction-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-ECHO est� desactivado.
-            const homeTeam = document.getElementById('homeTeam').value;
-            const awayTeam = document.getElementById('awayTeam').value;
-            const league = document.getElementById('league').value;
-            const date = document.getElementById('date').value;
-ECHO est� desactivado.
-            // Mostrar loading
-            const button = this.querySelector('button');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analizando...';
-            button.disabled = true;
-ECHO est� desactivado.
-            try {
-                // Llamar a la API
-                const response = await fetch('/api/predict', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({homeTeam, awayTeam, league, date})
-                });
-ECHO est� desactivado.
-                const data = await response.json();
-ECHO est� desactivado.
-                if (data.success) {
-                    // Mostrar resultados
-                    document.getElementById('home-name').textContent = homeTeam;
-                    document.getElementById('away-name').textContent = awayTeam;
-                    document.getElementById('league-name').textContent = league;
-                    document.getElementById('match-date').textContent = date;
-ECHO est� desactivado.
-                    document.getElementById('home-prob').textContent = Math.round(data.data.victoria_local * 100) + '%';
-                    document.getElementById('draw-prob').textContent = Math.round(data.data.empate * 100) + '%';
-                    document.getElementById('away-prob').textContent = Math.round(data.data.victoria_visitante * 100) + '%';
-ECHO est� desactivado.
-                    document.getElementById('analysis-text').textContent = data.data.analisis.general;
-ECHO est� desactivado.
-                    // Mostrar seccion de resultados
-                    document.getElementById('results').style.display = 'block';
-                    document.getElementById('results').scrollIntoView({behavior: 'smooth'});
-                } else {
-                    alert('Error generando prediccion');
+    <!-- Información sobre fuentes de datos -->
+    <div class="container my-5">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sobre las Fuentes de Datos
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-brain me-2 text-primary"></i>Inteligencia Artificial</h6>
+                        <p class="small">Modelos de Machine Learning entrenados con datos históricos de múltiples temporadas.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-plug me-2 text-success"></i>APIs Externas (Futuro)</h6>
+                        <p class="small">Integración planificada con API-Football y otras fuentes de datos en tiempo real.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-spider me-2 text-warning"></i>Web Scraping (Futuro)</h6>
+                        <p class="small">Sistema de respaldo mediante extracción de datos de sitios deportivos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-futbol me-2"></i>Predictor de Fútbol Premium</h5>
+                    <p class="small">Predicciones inteligentes con tecnología de vanguardia</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small mb-0">
+                        <i class="fas fa-code me-1"></i>
+                        Powered by Machine Learning & Node.js
+                    </p>
+                    <p class="small">
+                        <i class="fas fa-server me-1"></i>
+                        <span id="api-status">API Status: <span class="text-success">Online</span></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript de la aplicación -->
+    <script src="js/main.js"></script>
+    
+    <!-- Script de verificación de API al cargar -->
+    <script>
+        // Verificar estado de la API al cargar
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                const statusEl = document.getElementById('api-status');
+                if (statusEl) {
+                    statusEl.innerHTML = 'API Status: <span class="text-success">Online</span>';
                 }
-            } catch (error) {
-                alert('Error conectando con el servidor');
-            } finally {
-                // Restaurar boton
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        });
+                console.log('✅ API Health Check:', data);
+            })
+            .catch(error => {
+                const statusEl = document.getElementById('api-status');
+                if (statusEl) {
+                    statusEl.innerHTML = 'API Status: <span class="text-danger">Offline</span>';
+                }
+                console.error('❌ API Health Check Failed:', error);
+            });
     </script>
 </body>
 </html>
