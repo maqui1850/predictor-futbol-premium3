@@ -3,79 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor de Fútbol Premium</title>
+    <title>Predictor de Fútbol Premium - IA Avanzada</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Estilos personalizados -->
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             color: white;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></svg>') repeat;
+            animation: rotate 60s linear infinite;
+        }
+        
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+        
         .prediction-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        
         .prediction-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
         }
+        
         .confidence-high {
-            border-left: 4px solid #28a745;
-            background: linear-gradient(45deg, #d4edda, #f8f9fa);
+            border-left: 4px solid var(--success-color);
         }
+        
         .confidence-medium {
-            border-left: 4px solid #ffc107;
-            background: linear-gradient(45deg, #fff3cd, #f8f9fa);
+            border-left: 4px solid var(--warning-color);
         }
+        
         .confidence-low {
-            border-left: 4px solid #dc3545;
-            background: linear-gradient(45deg, #f8d7da, #f8f9fa);
+            border-left: 4px solid var(--danger-color);
         }
-        .vs-badge {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+        
+        .market-tab {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin: 0 0.25rem;
+        }
+        
+        .market-tab:hover {
+            background-color: rgba(0,123,255,0.1);
+        }
+        
+        .market-tab.active {
+            background-color: #007bff;
             color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.2rem;
         }
+        
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            transition: width 1s ease-in-out;
+            border-radius: 15px;
+        }
+        
         .team-logo {
             width: 60px;
             height: 60px;
             object-fit: contain;
         }
-        .loading {
-            opacity: 0.7;
+        
+        .vs-badge {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            display: inline-block;
         }
+        
         .feature-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin: 0 auto;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
         }
-        .match-meta-item {
-            margin: 0 15px;
-        }
+        
         .chart-container {
             position: relative;
             height: 300px;
+            width: 100%;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .ai-badge {
+            background: linear-gradient(45deg, #00b4d8, #0077b6);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .ai-badge i {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-white mt-3">Analizando con IA...</p>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="fas fa-futbol me-2"></i>
                 <span>Predictor de Fútbol Premium</span>
+                <span class="ai-badge ms-3">
+                    <i class="fas fa-brain"></i>
+                    IA Activada
+                </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -86,32 +201,39 @@
                         <a class="nav-link active" href="#">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="window.debugPredictor()">Debug</a>
+                        <a class="nav-link" href="#" onclick="testPrediction(); return false;">Test</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="window.testPrediction()">Test</a>
+                        <a class="nav-link" href="#" onclick="debugPredictor(); return false;">Debug</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            API Status: <span id="api-status" class="badge bg-success">Online</span>
+                        </span>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center ms-3">
-                    <span class="badge bg-success">🤖 IA Activada</span>
+                    <span class="text-light me-2">ML</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="ml-toggle" checked>
+                    </div>
+                    <span class="text-light ms-2">Stats</span>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <div class="hero-section py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold">Predicciones Premium de Fútbol</h1>
-                    <p class="lead">Inteligencia Artificial avanzada para predecir resultados de fútbol</p>
-                    <p class="text-light">Algoritmos de Machine Learning para los mercados más populares</p>
-                </div>
-                <div class="col-lg-6 text-center">
-                    <i class="fas fa-brain fa-5x mb-3"></i>
-                    <p class="h5">Predicciones con IA</p>
-                </div>
+    <div class="hero-section">
+        <div class="container text-center position-relative">
+            <h1 class="display-4 fw-bold mb-3">Predicciones Premium de Fútbol</h1>
+            <p class="lead">Inteligencia Artificial avanzada para predecir resultados de fútbol</p>
+            <p class="mb-0">Algoritmos de Machine Learning para los mercados más populares</p>
+            <div class="mt-4">
+                <span class="badge bg-light text-dark me-2">Gradient Boosting</span>
+                <span class="badge bg-light text-dark me-2">+30 Features</span>
+                <span class="badge bg-light text-dark me-2">68% Precisión</span>
+                <span class="badge bg-light text-dark">6 Mercados</span>
             </div>
         </div>
     </div>
@@ -125,12 +247,16 @@
             <div class="card-body">
                 <div id="error-container" class="d-none"></div>
                 
-                <form id="analysis-form" class="row g-3">
+                <form id="prediction-form" class="row g-3">
                     <div class="col-md-6">
                         <label for="league-select" class="form-label">Liga</label>
                         <select id="league-select" class="form-select" required>
-                            <option value="" selected>Selecciona una liga</option>
-                            <!-- Opciones cargadas dinámicamente por JavaScript -->
+                            <option value="">Selecciona una liga</option>
+                            <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+                            <option value="La Liga">🇪🇸 La Liga</option>
+                            <option value="Serie A">🇮🇹 Serie A</option>
+                            <option value="Bundesliga">🇩🇪 Bundesliga</option>
+                            <option value="Ligue 1">🇫🇷 Ligue 1</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -139,13 +265,21 @@
                     </div>
                     <div class="col-md-6">
                         <label for="home-team-select" class="form-label">Equipo Local</label>
-                        <input type="text" id="home-team-select" class="form-control" 
-                               placeholder="Ej: Real Madrid" required>
+                        <select id="home-team-select" class="form-select" required>
+                            <option value="">Selecciona equipo local</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label for="away-team-select" class="form-label">Equipo Visitante</label>
-                        <input type="text" id="away-team-select" class="form-control" 
-                               placeholder="Ej: Barcelona" required>
+                        <select id="away-team-select" class="form-select" required>
+                            <option value="">Selecciona equipo visitante</option>
+                        </select>
+                    </div>
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
+                            <i class="fas fa-brain me-2"></i>
+                            <span id="model-status">Predicción generada con Inteligencia Artificial avanzada</span>
+                        </div>
                     </div>
                     <div class="col-12 d-flex justify-content-end">
                         <button type="button" id="reset-btn" class="btn btn-outline-secondary me-2">
@@ -164,104 +298,256 @@
     <div id="prediction-container" class="container my-5 d-none">
         <!-- Información del partido -->
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-primary text-white">
                 <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Partido</h4>
             </div>
             <div class="card-body">
-                <div id="match-info" class="row align-items-center">
-                    <div class="col-md-5 text-center text-md-end">
-                        <div class="team-info">
-                            <img id="home-team-logo" src="" alt="Logo equipo local" class="team-logo mb-2 d-none">
-                            <h3 id="home-team-name" class="team-name">Equipo Local</h3>
-                        </div>
+                <div class="row align-items-center">
+                    <div class="col-md-5 text-center">
+                        <h3 id="home-team-name" class="mb-3">Equipo Local</h3>
+                        <img id="home-team-logo" src="" alt="Logo" class="team-logo d-none">
                     </div>
                     <div class="col-md-2 text-center my-3 my-md-0">
                         <span class="vs-badge">VS</span>
                     </div>
-                    <div class="col-md-5 text-center text-md-start">
-                        <div class="team-info">
-                            <img id="away-team-logo" src="" alt="Logo equipo visitante" class="team-logo mb-2 d-none">
-                            <h3 id="away-team-name" class="team-name">Equipo Visitante</h3>
-                        </div>
+                    <div class="col-md-5 text-center">
+                        <h3 id="away-team-name" class="mb-3">Equipo Visitante</h3>
+                        <img id="away-team-logo" src="" alt="Logo" class="team-logo d-none">
                     </div>
-                    <div class="col-12 mt-3">
-                        <div class="d-flex flex-wrap justify-content-center text-center match-meta">
-                            <div class="match-meta-item">
-                                <i class="far fa-calendar-alt text-primary me-1"></i>
-                                <span id="match-date">Fecha</span>
-                            </div>
-                            <div class="match-meta-item">
-                                <i class="fas fa-trophy text-primary me-1"></i>
-                                <span id="league-name">Liga</span>
-                            </div>
-                        </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="far fa-calendar-alt text-primary me-2"></i>
+                        <span id="match-date">Fecha</span>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-trophy text-primary me-2"></i>
+                        <span id="league-name">Liga</span>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        <span id="match-venue">Estadio</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Resultados de predicción -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Predicción 1X2</h4>
+        <!-- Mejor apuesta recomendada -->
+        <div id="best-bet-container" class="mb-4"></div>
+
+        <!-- Navegación de mercados -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <div class="d-flex flex-wrap justify-content-center">
+                    <span class="market-tab active" data-market-tab="1x2">
+                        <i class="fas fa-poll me-1"></i> Resultado
+                    </span>
+                    <span class="market-tab" data-market-tab="btts">
+                        <i class="fas fa-futbol me-1"></i> BTTS
+                    </span>
+                    <span class="market-tab" data-market-tab="over-under">
+                        <i class="fas fa-chart-line me-1"></i> Goles
+                    </span>
+                    <span class="market-tab" data-market-tab="corners">
+                        <i class="fas fa-flag me-1"></i> Córners
+                    </span>
+                    <span class="market-tab" data-market-tab="cards">
+                        <i class="fas fa-square me-1"></i> Tarjetas
+                    </span>
+                    <span class="market-tab" data-market-tab="handicap">
+                        <i class="fas fa-balance-scale me-1"></i> Hándicap
+                    </span>
+                </div>
             </div>
             <div class="card-body">
-                <div class="row g-4">
-                    <!-- Victoria Local -->
-                    <div class="col-md-4">
-                        <div class="prediction-card card h-100 confidence-medium">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-home fa-2x text-success"></i>
+                <!-- Mercado 1X2 -->
+                <div id="market-1x2" class="market-content">
+                    <h5 class="card-title mb-4">Predicción de Resultado (1X2)</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="prediction-card card h-100 confidence-high">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">🏠 Victoria Local</h5>
+                                    <h2 id="home-win-prob" class="text-success">0.0%</h2>
+                                    <div class="progress mt-3">
+                                        <div id="home-win-bar" class="progress-bar bg-success" style="width: 0%"></div>
+                                    </div>
                                 </div>
-                                <h5 class="card-title">🏠 Victoria Local</h5>
-                                <h2 id="home-prob" class="text-success mb-3">--%</h2>
-                                <p class="card-text small">Probabilidad de que gane el equipo local</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="prediction-card card h-100 confidence-medium">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">🤝 Empate</h5>
+                                    <h2 id="draw-prob" class="text-warning">0.0%</h2>
+                                    <div class="progress mt-3">
+                                        <div id="draw-bar" class="progress-bar bg-warning" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="prediction-card card h-100 confidence-low">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">✈️ Victoria Visitante</h5>
+                                    <h2 id="away-win-prob" class="text-danger">0.0%</h2>
+                                    <div class="progress mt-3">
+                                        <div id="away-bar" class="progress-bar bg-danger" style="width: 0%"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Empate -->
-                    <div class="col-md-4">
-                        <div class="prediction-card card h-100 confidence-medium">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-handshake fa-2x text-warning"></i>
-                                </div>
-                                <h5 class="card-title">🤝 Empate</h5>
-                                <h2 id="draw-prob" class="text-warning mb-3">--%</h2>
-                                <p class="card-text small">Probabilidad de empate</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Victoria Visitante -->
-                    <div class="col-md-4">
-                        <div class="prediction-card card h-100 confidence-medium">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-plane fa-2x text-danger"></i>
-                                </div>
-                                <h5 class="card-title">✈️ Victoria Visitante</h5>
-                                <h2 id="away-prob" class="text-danger mb-3">--%</h2>
-                                <p class="card-text small">Probabilidad de que gane el visitante</p>
-                            </div>
-                        </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="result-analysis">Análisis pendiente...</span>
                     </div>
                 </div>
 
-                <!-- Análisis de IA -->
-                <div class="mt-4">
-                    <div class="card border-info">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-lightbulb me-2 text-warning"></i>
-                                Análisis de Inteligencia Artificial
-                            </h5>
-                            <p id="analysis-text" class="mb-0 lead">
-                                Cargando análisis de IA...
-                            </p>
+                <!-- Mercado BTTS -->
+                <div id="market-btts" class="market-content d-none">
+                    <h5 class="card-title mb-4">Ambos Equipos Marcan (BTTS)</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>✅ Sí</h5>
+                                    <h2 id="btts-yes-prob" class="text-success">0.0%</h2>
+                                    <div class="progress mt-3">
+                                        <div id="btts-yes-bar" class="progress-bar bg-success" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>❌ No</h5>
+                                    <h2 id="btts-no-prob" class="text-danger">0.0%</h2>
+                                    <div class="progress mt-3">
+                                        <div id="btts-no-bar" class="progress-bar bg-danger" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="btts-analysis">Análisis pendiente...</span>
+                    </div>
+                </div>
+
+                <!-- Mercado Over/Under -->
+                <div id="market-over-under" class="market-content d-none">
+                    <h5 class="card-title mb-4">Goles Totales (Over/Under)</h5>
+                    <div id="over-under-predictions"></div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="over-under-analysis">Análisis pendiente...</span>
+                    </div>
+                </div>
+
+                <!-- Mercado Córners -->
+                <div id="market-corners" class="market-content d-none">
+                    <h5 class="card-title mb-4">Predicción de Córners</h5>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="text-center mb-4">
+                                <h3><i class="fas fa-flag text-primary"></i> <span id="corners-total">0 córners esperados</span></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Equipo Local</h6>
+                                    <p class="mb-2" id="corners-home">0 córners</p>
+                                    <div class="progress">
+                                        <div id="corners-home-bar" class="progress-bar bg-primary" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Equipo Visitante</h6>
+                                    <p class="mb-2" id="corners-away">0 córners</p>
+                                    <div class="progress">
+                                        <div id="corners-away-bar" class="progress-bar bg-info" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="corners-analysis">Análisis pendiente...</span>
+                    </div>
+                </div>
+
+                <!-- Mercado Tarjetas -->
+                <div id="market-cards" class="market-content d-none">
+                    <h5 class="card-title mb-4">Predicción de Tarjetas</h5>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Total Esperado</h6>
+                                    <h3><i class="fas fa-square text-warning"></i> <span id="cards-total">0</span></h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Amarillas</h6>
+                                    <h3><i class="fas fa-square text-warning"></i> <span id="cards-yellow">0</span></h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Rojas</h6>
+                                    <h3><i class="fas fa-square text-danger"></i> <span id="cards-red">0</span></h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="cards-analysis">Análisis pendiente...</span>
+                    </div>
+                </div>
+
+                <!-- Mercado Hándicap -->
+                <div id="market-handicap" class="market-content d-none">
+                    <h5 class="card-title mb-4">Hándicap Asiático</h5>
+                    <div id="handicap-predictions"></div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <span id="handicap-analysis">Análisis pendiente...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del modelo -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Información del Modelo IA</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Tipo:</strong> <span id="model-type">Machine Learning</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Precisión:</strong> <span id="model-accuracy">68%</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Confianza:</strong> <span id="model-confidence">⭐⭐⭐⭐</span>
                     </div>
                 </div>
             </div>
@@ -275,7 +561,7 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="feature-icon bg-primary text-white mb-3">
+                        <div class="feature-icon bg-primary text-white">
                             <i class="fas fa-brain"></i>
                         </div>
                         <h5 class="card-title">Inteligencia Artificial</h5>
@@ -286,7 +572,7 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="feature-icon bg-primary text-white mb-3">
+                        <div class="feature-icon bg-success text-white">
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <h5 class="card-title">Análisis Estadístico</h5>
@@ -297,8 +583,8 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="feature-icon bg-primary text-white mb-3">
-                            <i class="fas fa-tachometer-alt"></i>
+                        <div class="feature-icon bg-info text-white">
+                            <i class="fas fa-bolt"></i>
                         </div>
                         <h5 class="card-title">Respuesta Rápida</h5>
                         <p class="card-text">Predicciones generadas en tiempo real con sistema de fallback para máxima disponibilidad.</p>
@@ -308,48 +594,21 @@
         </div>
     </div>
 
-    <!-- Información sobre fuentes de datos -->
-    <div class="container my-5">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Sobre las Fuentes de Datos
-                </h5>
-                <div class="row">
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-brain me-2 text-primary"></i>Inteligencia Artificial</h6>
-                        <p class="small">Modelos de Machine Learning entrenados con datos históricos de múltiples temporadas.</p>
-                    </div>
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-plug me-2 text-success"></i>APIs Externas (Futuro)</h6>
-                        <p class="small">Integración planificada con API-Football y otras fuentes de datos en tiempo real.</p>
-                    </div>
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-spider me-2 text-warning"></i>Web Scraping (Futuro)</h6>
-                        <p class="small">Sistema de respaldo mediante extracción de datos de sitios deportivos.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
+    <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
                     <h5><i class="fas fa-futbol me-2"></i>Predictor de Fútbol Premium</h5>
                     <p class="small">Predicciones inteligentes con tecnología de vanguardia</p>
                 </div>
-                <div class="col-md-6 text-md-end">
+                <div class="col-md-6 text-end">
                     <p class="small mb-0">
-                        <i class="fas fa-code me-1"></i>
-                        Powered by Machine Learning & Node.js
-                    </p>
-                    <p class="small">
-                        <i class="fas fa-server me-1"></i>
-                        <span id="api-status">API Status: <span class="text-success">Online</span></span>
+                        <i class="fas fa-code me-1"></i> Powered by Machine Learning & Node.js<br>
+                        <span class="ai-badge mt-2">
+                            <i class="fas fa-brain"></i>
+                            API Status: <span id="api-status-footer">Online</span>
+                        </span>
                     </p>
                 </div>
             </div>
@@ -358,29 +617,16 @@
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- JavaScript de la aplicación -->
+    <!-- Main JavaScript -->
     <script src="js/main.js"></script>
-    
-    <!-- Script de verificación de API al cargar -->
     <script>
-        // Verificar estado de la API al cargar
-        fetch('/api/health')
-            .then(response => response.json())
-            .then(data => {
-                const statusEl = document.getElementById('api-status');
-                if (statusEl) {
-                    statusEl.innerHTML = 'API Status: <span class="text-success">Online</span>';
-                }
-                console.log('✅ API Health Check:', data);
-            })
-            .catch(error => {
-                const statusEl = document.getElementById('api-status');
-                if (statusEl) {
-                    statusEl.innerHTML = 'API Status: <span class="text-danger">Offline</span>';
-                }
-                console.error('❌ API Health Check Failed:', error);
-            });
+        // Configurar fecha de hoy por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('date-input');
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        });
     </script>
 </body>
 </html>
