@@ -628,5 +628,123 @@
             }
         });
     </script>
+<!-- AÑADIR ESTE CSS AL FINAL DE frontend/index.html, ANTES DE </body> -->
+
+<style>
+/* 🛠️ CSS OVERRIDE - Arregla errores de Bootstrap utilities */
+
+/* 1. Arreglar column-gap deprecado */
+.row, .container, .container-fluid {
+    gap: inherit !important;
+    column-gap: inherit !important;
+}
+
+/* 2. Forzar visibilidad de pestañas de predicción */
+#predictionTabContent {
+    display: block !important;
+    min-height: 400px;
+}
+
+.tab-pane {
+    display: none;
+    padding: 20px 0;
+}
+
+.tab-pane.active, .tab-pane.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 3. Contenedores de predicciones */
+.prediction-results {
+    display: block !important;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 4. Probabilidades visibles */
+.probability-display {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff;
+    text-align: center;
+    margin: 15px 0;
+}
+
+/* 5. Análisis de mercados */
+.market-analysis {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border-left: 4px solid #28a745;
+}
+
+/* 6. Cards de resultados */
+.result-card, .btts-card, .over-under-card, 
+.corners-card, .cards-card, .handicap-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    min-height: 200px;
+}
+
+/* 7. Debug temporal - quitar después */
+.tab-pane.active {
+    border: 2px solid green !important;
+    background: rgba(0,255,0,0.05) !important;
+}
+
+/* 8. Texto visible */
+.prediction-text, .analysis-text {
+    color: #333 !important;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* 9. Botones y navegación */
+.nav-tabs .nav-link {
+    color: #495057 !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #fff !important;
+    border-color: #dee2e6 #dee2e6 #fff !important;
+}
+</style>
+
+<!-- Script para debug temporal -->
+<script>
+// Debug: Forzar visibilidad de pestañas
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 CSS Override cargado - buscando pestañas...');
+    
+    // Verificar que las pestañas existen
+    const tabs = document.querySelectorAll('.tab-pane');
+    console.log(`📋 Encontradas ${tabs.length} pestañas`);
+    
+    // Forzar visibilidad de la primera pestaña
+    if (tabs.length > 0) {
+        tabs[0].classList.add('active', 'show');
+        console.log('✅ Primera pestaña activada');
+    }
+    
+    // Debug info cada 3 segundos
+    setInterval(() => {
+        const activeTab = document.querySelector('.tab-pane.active');
+        if (activeTab) {
+            console.log('✅ Pestaña activa encontrada:', activeTab.id);
+        } else {
+            console.log('❌ No hay pestañas activas');
+        }
+    }, 3000);
+});
+</script>
 </body>
 </html>
