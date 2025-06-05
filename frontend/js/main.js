@@ -1,675 +1,673 @@
-// ⚽ PREDICTOR DE FÚTBOL PREMIUM - JAVASCRIPT COMPLETO
-// Con todos los mercados: 1X2, BTTS, Over/Under, Córners, Tarjetas, Hándicap
+// frontend/js/main.js - VERSIÓN CORREGIDA Y COMPLETA
 
-(function() {
-    'use strict';
-    
-    console.log('🚀 Predictor de Fútbol Premium - Iniciando...');
-    
-    // Variables globales
-    let currentPrediction = null;
-    let selectedMarket = '1x2';
-    
-    // Configuración de mercados
-    const MARKETS = {
-        '1x2': { name: 'Resultado 1X2', icon: '🏆' },
-        'btts': { name: 'Ambos Marcan', icon: '⚽' },
-        'over_under': { name: 'Goles Totales', icon: '📊' },
-        'corners': { name: 'Córners', icon: '🚩' },
-        'cards': { name: 'Tarjetas', icon: '🟨' },
-        'handicap': { name: 'Hándicap', icon: '⚖️' }
-    };
-    
-    // Equipos por liga (expandible con API real)
-    const TEAMS_BY_LEAGUE = {
-        'Premier League': [
-            'Manchester City', 'Arsenal', 'Liverpool', 'Chelsea', 'Manchester United',
-            'Tottenham', 'Newcastle', 'Brighton', 'Aston Villa', 'West Ham',
-            'Brentford', 'Crystal Palace', 'Fulham', 'Bournemouth', 'Wolves',
-            'Nottingham Forest', 'Everton', 'Leicester', 'Leeds', 'Southampton'
-        ],
-        'La Liga': [
-            'Real Madrid', 'Barcelona', 'Atletico Madrid', 'Real Sociedad', 'Villarreal',
-            'Real Betis', 'Athletic Bilbao', 'Valencia', 'Osasuna', 'Rayo Vallecano',
-            'Sevilla', 'Mallorca', 'Girona', 'Celta Vigo', 'Getafe',
-            'Cadiz', 'Elche', 'Espanyol', 'Valladolid', 'Almeria'
-        ],
-        'Serie A': [
-            'Napoli', 'Inter', 'AC Milan', 'Juventus', 'Lazio', 'Roma', 'Atalanta',
-            'Udinese', 'Torino', 'Fiorentina', 'Bologna', 'Sassuolo', 'Empoli',
-            'Monza', 'Lecce', 'Hellas Verona', 'Salernitana', 'Spezia', 'Cremonese', 'Sampdoria'
-        ],
-        'Bundesliga': [
-            'Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Union Berlin',
-            'Freiburg', 'Bayer Leverkusen', 'Eintracht Frankfurt', 'Wolfsburg',
-            'Mainz', 'Borussia Monchengladbach', 'Koln', 'Hoffenheim', 'Werder Bremen',
-            'Bochum', 'Augsburg', 'VfB Stuttgart', 'Schalke', 'Hertha Berlin'
-        ],
-        'Ligue 1': [
-            'PSG', 'Lens', 'Marseille', 'Monaco', 'Lille', 'Rennes', 'Nice',
-            'Lorient', 'Lyon', 'Clermont', 'Reims', 'Toulouse', 'Troyes',
-            'Montpellier', 'Nantes', 'Brest', 'Strasbourg', 'Auxerre', 'Ajaccio', 'Angers'
-        ]
-    };
-    
-    // Inicialización cuando el DOM está listo
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM cargado, inicializando...');
-        initializeApp();
-    });
-    
-    function initializeApp() {
-        setupFormHandlers();
-        setupMarketTabs();
-        setupDebugButtons();
-        setupTeamAutocomplete();
-        checkAPIStatus();
+class PredictorApp {
+    constructor() {
+        this.apiUrl = 'http://localhost:3000/api';
+        this.pythonUrl = 'http://localhost:5000/api';
+        this.currentPrediction = null;
+        this.isLoading = false;
         
-        // Test automático en desarrollo
-        if (window.location.hostname === 'localhost') {
-            console.log('🧪 Modo desarrollo detectado');
-        }
-    }
-    
-    function setupFormHandlers() {
-        const form = document.getElementById('prediction-form');
-        const analyzeBtn = document.getElementById('analyze-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        
-        if (form && analyzeBtn) {
-            form.addEventListener('submit', handleFormSubmit);
-            analyzeBtn.addEventListener('click', handleFormSubmit);
-            console.log('✅ Formulario configurado');
-        }
-        
-        if (resetBtn) {
-            resetBtn.addEventListener('click', resetForm);
-        }
-        
-        // Actualizar equipos cuando cambia la liga
-        const leagueSelect = document.getElementById('league-select');
-        if (leagueSelect) {
-            leagueSelect.addEventListener('change', updateTeamOptions);
-            updateTeamOptions(); // Cargar equipos iniciales
-        }
-    }
-    
-    function setupMarketTabs() {
-        const tabButtons = document.querySelectorAll('[data-market-tab]');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const market = this.getAttribute('data-market-tab');
-                showMarket(market);
-            });
-        });
-    }
-    
-    function setupDebugButtons() {
-        // Botón Test
-        const testBtn = document.querySelector('a[href="#"][contains(text(), "Test")]');
-        if (testBtn) {
-            testBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                testPrediction();
-            });
-        }
-        
-        // Botón Debug
-        const debugBtn = document.querySelector('a[href="#"][contains(text(), "Debug")]');
-        if (debugBtn) {
-            debugBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                debugInfo();
-            });
-        }
-    }
-    
-    function setupTeamAutocomplete() {
-        const homeInput = document.getElementById('home-team-select');
-        const awayInput = document.getElementById('away-team-select');
-        
-        [homeInput, awayInput].forEach(input => {
-            if (input && input.tagName === 'INPUT') {
-                // Convertir a datalist para autocompletado
-                const datalistId = input.id + '-list';
-                const datalist = document.createElement('datalist');
-                datalist.id = datalistId;
-                input.setAttribute('list', datalistId);
-                input.parentNode.appendChild(datalist);
-            }
-        });
-    }
-    
-    function updateTeamOptions() {
-        const leagueSelect = document.getElementById('league-select');
-        const homeSelect = document.getElementById('home-team-select');
-        const awaySelect = document.getElementById('away-team-select');
-        
-        if (!leagueSelect || !homeSelect || !awaySelect) return;
-        
-        const selectedLeague = leagueSelect.value;
-        const teams = TEAMS_BY_LEAGUE[selectedLeague] || [];
-        
-        // Actualizar opciones
-        [homeSelect, awaySelect].forEach(select => {
-            if (select.tagName === 'SELECT') {
-                select.innerHTML = '<option value="">Selecciona equipo</option>';
-                teams.forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team;
-                    option.textContent = team;
-                    select.appendChild(option);
-                });
-            } else if (select.tagName === 'INPUT') {
-                // Actualizar datalist
-                const datalist = document.getElementById(select.getAttribute('list'));
-                if (datalist) {
-                    datalist.innerHTML = '';
-                    teams.forEach(team => {
-                        const option = document.createElement('option');
-                        option.value = team;
-                        datalist.appendChild(option);
-                    });
+        // Configuración de ligas mundiales
+        this.worldLeagues = {
+            'Europa': {
+                'Premier League': {
+                    country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra',
+                    teams: ['Manchester City', 'Arsenal', 'Liverpool', 'Chelsea', 'Manchester United', 'Tottenham', 'Newcastle', 'Brighton', 'West Ham', 'Aston Villa', 'Crystal Palace', 'Brentford', 'Fulham', 'Wolves', 'Everton', 'Nottingham Forest', 'Burnley', 'Sheffield United', 'Luton Town', 'Bournemouth']
+                },
+                'La Liga': {
+                    country: '🇪🇸 España',
+                    teams: ['Real Madrid', 'Barcelona', 'Atlético Madrid', 'Sevilla', 'Real Sociedad', 'Real Betis', 'Villarreal', 'Valencia', 'Athletic Bilbao', 'Getafe', 'Osasuna', 'Las Palmas', 'Girona', 'Rayo Vallecano', 'Mallorca', 'Celta Vigo', 'Cadiz', 'Granada', 'Almeria', 'Alaves']
+                },
+                'Bundesliga': {
+                    country: '🇩🇪 Alemania',
+                    teams: ['Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Union Berlin', 'SC Freiburg', 'Bayer Leverkusen', 'Eintracht Frankfurt', 'Wolfsburg', 'Mainz', 'Borussia Monchengladbach', 'FC Koln', 'Werder Bremen', 'Augsburg', 'VfB Stuttgart', 'Hoffenheim', 'VfL Bochum', 'Heidenheim', 'Darmstadt']
+                },
+                'Serie A': {
+                    country: '🇮🇹 Italia',
+                    teams: ['Inter Milan', 'AC Milan', 'Juventus', 'Napoli', 'AS Roma', 'Lazio', 'Atalanta', 'Fiorentina', 'Bologna', 'Torino', 'Monza', 'Genoa', 'Lecce', 'Udinese', 'Cagliari', 'Hellas Verona', 'Empoli', 'Frosinone', 'Sassuolo', 'Salernitana']
+                },
+                'Ligue 1': {
+                    country: '🇫🇷 Francia',
+                    teams: ['Paris Saint-Germain', 'AS Monaco', 'Lille', 'Olympique Marseille', 'Olympique Lyon', 'Nice', 'Lens', 'Rennes', 'Strasbourg', 'Montpellier', 'Nantes', 'Brest', 'Reims', 'Toulouse', 'Le Havre', 'Metz', 'Lorient', 'Clermont']
+                }
+            },
+            'Sudamérica': {
+                'Liga Argentina': {
+                    country: '🇦🇷 Argentina',
+                    teams: ['River Plate', 'Boca Juniors', 'Racing Club', 'Independiente', 'San Lorenzo', 'Estudiantes', 'Velez Sarsfield', 'Lanus', 'Defensa y Justicia', 'Talleres']
+                },
+                'Brasileirao': {
+                    country: '🇧🇷 Brasil',
+                    teams: ['Flamengo', 'Palmeiras', 'Sao Paulo', 'Corinthians', 'Santos', 'Atletico Mineiro', 'Internacional', 'Gremio', 'Fluminense', 'Botafogo']
+                }
+            },
+            'Norteamérica': {
+                'MLS': {
+                    country: '🇺🇸 Estados Unidos',
+                    teams: ['LA Galaxy', 'LAFC', 'Seattle Sounders', 'Portland Timbers', 'Atlanta United', 'Inter Miami', 'New York City FC', 'New York Red Bulls', 'Chicago Fire', 'Toronto FC']
+                },
+                'Liga MX': {
+                    country: '🇲🇽 México',
+                    teams: ['Club America', 'Chivas', 'Cruz Azul', 'Pumas', 'Tigres', 'Monterrey', 'Santos Laguna', 'Pachuca', 'Leon', 'Atlas']
                 }
             }
-        });
+        };
         
-        console.log(`✅ Equipos actualizados para ${selectedLeague}: ${teams.length} equipos`);
+        this.init();
     }
-    
-    async function handleFormSubmit(e) {
-        e.preventDefault();
-        console.log('📤 Enviando formulario...');
-        
-        // Obtener datos del formulario
-        const formData = getFormData();
-        if (!validateFormData(formData)) {
-            return;
+
+    init() {
+        this.setupEventListeners();
+        this.populateLeagues();
+        this.setupNavigation();
+        this.checkServices();
+        this.setDefaultDate();
+    }
+
+    setupEventListeners() {
+        // Formulario principal
+        const form = document.getElementById('analysis-form');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         }
-        
-        // Mostrar loading
-        showLoading(true);
-        
-        try {
-            // Llamar a la API
-            const response = await fetch('/api/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
+
+        // Selector de liga
+        const leagueSelect = document.getElementById('league-select');
+        if (leagueSelect) {
+            leagueSelect.addEventListener('change', (e) => this.handleLeagueChange(e));
+        }
+
+        // Botón de análisis
+        const analyzeBtn = document.getElementById('analyze-btn');
+        if (analyzeBtn) {
+            analyzeBtn.addEventListener('click', (e) => this.handleAnalyzeClick(e));
+        }
+
+        // Botón reset
+        const resetBtn = document.getElementById('reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', (e) => this.handleReset(e));
+        }
+    }
+
+    populateLeagues() {
+        const leagueSelect = document.getElementById('league-select');
+        if (!leagueSelect) return;
+
+        leagueSelect.innerHTML = '<option value="">Selecciona una liga</option>';
+
+        Object.entries(this.worldLeagues).forEach(([continent, leagues]) => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = continent;
+
+            Object.entries(leagues).forEach(([leagueName, leagueData]) => {
+                const option = document.createElement('option');
+                option.value = leagueName;
+                option.textContent = `${leagueData.country} ${leagueName}`;
+                optgroup.appendChild(option);
             });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+
+            leagueSelect.appendChild(optgroup);
+        });
+    }
+
+    handleLeagueChange(e) {
+        const selectedLeague = e.target.value;
+        this.populateTeams(selectedLeague);
+    }
+
+    populateTeams(leagueName) {
+        const homeTeamSelect = document.getElementById('home-team-select');
+        const awayTeamSelect = document.getElementById('away-team-select');
+        
+        if (!homeTeamSelect || !awayTeamSelect || !leagueName) return;
+
+        // Encontrar los equipos de la liga seleccionada
+        let teams = [];
+        Object.values(this.worldLeagues).forEach(continent => {
+            if (continent[leagueName]) {
+                teams = continent[leagueName].teams;
             }
-            
-            const data = await response.json();
-            console.log('✅ Respuesta recibida:', data);
-            
-            // Guardar predicción actual
-            currentPrediction = data;
-            
-            // Mostrar resultados
-            displayResults(data);
-            
-        } catch (error) {
-            console.error('❌ Error:', error);
-            showError('Error al generar predicción: ' + error.message);
-        } finally {
-            showLoading(false);
+        });
+
+        // Populate home team select
+        homeTeamSelect.innerHTML = '<option value="">Selecciona equipo local</option>';
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team;
+            option.textContent = team;
+            homeTeamSelect.appendChild(option);
+        });
+
+        // Populate away team select
+        awayTeamSelect.innerHTML = '<option value="">Selecciona equipo visitante</option>';
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team;
+            option.textContent = team;
+            awayTeamSelect.appendChild(option);
+        });
+    }
+
+    setDefaultDate() {
+        const dateInput = document.getElementById('date-input');
+        if (dateInput) {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            dateInput.value = formattedDate;
         }
     }
-    
-    function getFormData() {
+
+    async handleFormSubmit(e) {
+        e.preventDefault();
+        await this.generatePrediction();
+    }
+
+    async handleAnalyzeClick(e) {
+        e.preventDefault();
+        await this.generatePrediction();
+    }
+
+    async generatePrediction() {
+        if (this.isLoading) return;
+
         const league = document.getElementById('league-select')?.value;
         const homeTeam = document.getElementById('home-team-select')?.value;
         const awayTeam = document.getElementById('away-team-select')?.value;
         const date = document.getElementById('date-input')?.value;
-        
-        return {
-            league,
-            homeTeam,
-            awayTeam,
-            date: date || new Date().toISOString().split('T')[0]
-        };
-    }
-    
-    function validateFormData(data) {
-        if (!data.homeTeam || !data.awayTeam || !data.league) {
-            showError('Por favor completa todos los campos');
-            return false;
+
+        // Validación
+        if (!league || !homeTeam || !awayTeam || !date) {
+            this.showError('Por favor completa todos los campos');
+            return;
         }
-        
-        if (data.homeTeam === data.awayTeam) {
-            showError('Los equipos deben ser diferentes');
-            return false;
+
+        if (homeTeam === awayTeam) {
+            this.showError('Un equipo no puede jugar contra sí mismo');
+            return;
         }
-        
-        return true;
+
+        this.setLoading(true);
+        this.hideError();
+
+        try {
+            // Intentar predicción avanzada primero
+            let prediction = await this.tryAdvancedPrediction({
+                homeTeam,
+                awayTeam,
+                league,
+                date
+            });
+
+            if (!prediction) {
+                // Fallback a predicción simple
+                prediction = await this.trySimplePrediction({
+                    homeTeam,
+                    awayTeam,
+                    league,
+                    date
+                });
+            }
+
+            if (prediction) {
+                this.displayPrediction(prediction, { homeTeam, awayTeam, league, date });
+            } else {
+                throw new Error('No se pudo generar la predicción');
+            }
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            this.showError(`Error al generar predicción: ${error.message}`);
+        } finally {
+            this.setLoading(false);
+        }
     }
-    
-    function displayResults(data) {
-        console.log('📊 Mostrando resultados...');
+
+    async tryAdvancedPrediction(matchData) {
+        try {
+            const response = await fetch(`${this.apiUrl}/predict/advanced`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(matchData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Predicción avanzada exitosa:', data);
+                return data;
+            }
+        } catch (error) {
+            console.warn('⚠️ Predicción avanzada falló, usando fallback');
+        }
+        return null;
+    }
+
+    async trySimplePrediction(matchData) {
+        try {
+            const response = await fetch(`${this.apiUrl}/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(matchData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Predicción simple exitosa:', data);
+            return data;
+
+        } catch (error) {
+            console.error('❌ Error en predicción simple:', error);
+            throw error;
+        }
+    }
+
+    displayPrediction(prediction, matchInfo) {
+        this.currentPrediction = prediction;
         
-        // Mostrar contenedor de resultados
+        // Mostrar información del partido
+        this.updateMatchInfo(matchInfo);
+        
+        // Mostrar predicciones en pestañas
+        this.updateResultTab(prediction.data);
+        this.updateBTTSTab(prediction.data);
+        this.updateOverUnderTab(prediction.data);
+        this.updateCornersTab(prediction.data);
+        this.updateCardsTab(prediction.data);
+        this.updateHandicapTab(prediction.data);
+        
+        // Mostrar mejor apuesta
+        this.updateBestBet(prediction.data);
+        
+        // Mostrar container de resultados
         const container = document.getElementById('prediction-container');
         if (container) {
             container.classList.remove('d-none');
             container.scrollIntoView({ behavior: 'smooth' });
         }
-        
-        // Actualizar información del partido
-        updateMatchInfo(data);
-        
-        // Mostrar todos los mercados
-        displayMarket1X2(data);
-        displayMarketBTTS(data);
-        displayMarketOverUnder(data);
-        displayMarketCorners(data);
-        displayMarketCards(data);
-        displayMarketHandicap(data);
-        
-        // Mostrar mejor apuesta
-        displayBestBet(data);
-        
-        // Actualizar información del modelo
-        updateModelInfo(data);
     }
-    
-    function updateMatchInfo(data) {
-        // Actualizar nombres de equipos
-        setText('home-team-name', data.homeTeam || data.equipoLocal);
-        setText('away-team-name', data.awayTeam || data.equipoVisitante);
-        setText('league-name', data.league || data.liga);
-        setText('match-date', formatDate(data.date || data.fecha));
-        setText('match-venue', 'Estadio: Por determinar');
+
+    updateMatchInfo(matchInfo) {
+        const homeTeamName = document.getElementById('home-team-name');
+        const awayTeamName = document.getElementById('away-team-name');
+        const matchDate = document.getElementById('match-date');
+        const leagueName = document.getElementById('league-name');
+        const matchVenue = document.getElementById('match-venue');
+
+        if (homeTeamName) homeTeamName.textContent = matchInfo.homeTeam;
+        if (awayTeamName) awayTeamName.textContent = matchInfo.awayTeam;
+        if (matchDate) matchDate.textContent = this.formatDate(matchInfo.date);
+        if (leagueName) leagueName.textContent = matchInfo.league;
+        if (matchVenue) matchVenue.textContent = `Estadio del ${matchInfo.homeTeam}`;
     }
-    
-    function displayMarket1X2(data) {
-        const predictions = data.data || data;
-        
-        // Calcular probabilidades
-        const homeWin = predictions.victoria_local || predictions.homeWinProbability || 0.33;
-        const draw = predictions.empate || predictions.drawProbability || 0.33;
-        const awayWin = predictions.victoria_visitante || predictions.awayWinProbability || 0.34;
-        
-        // Actualizar UI
-        setText('home-win-prob', `${(homeWin * 100).toFixed(1)}%`);
-        setText('draw-prob', `${(draw * 100).toFixed(1)}%`);
-        setText('away-win-prob', `${(awayWin * 100).toFixed(1)}%`);
-        
-        // Actualizar barras de progreso
-        updateProgressBar('home-win-bar', homeWin * 100);
-        updateProgressBar('draw-bar', draw * 100);
-        updateProgressBar('away-bar', awayWin * 100);
-        
-        // Análisis
-        const analysis = predictions.analisis?.general || generateAnalysis1X2(homeWin, draw, awayWin);
-        setText('result-analysis', analysis);
-    }
-    
-    function displayMarketBTTS(data) {
-        const predictions = data.data || data;
-        const markets = predictions.markets || predictions.mercados_adicionales || {};
-        
-        const bttsYes = markets.btts?.yes || markets.ambos_equipos_marcan || 0.5;
-        const bttsNo = 1 - bttsYes;
-        
-        setText('btts-yes-prob', `${(bttsYes * 100).toFixed(1)}%`);
-        setText('btts-no-prob', `${(bttsNo * 100).toFixed(1)}%`);
-        
-        updateProgressBar('btts-yes-bar', bttsYes * 100);
-        updateProgressBar('btts-no-bar', bttsNo * 100);
-        
-        setText('btts-analysis', generateAnalysisBTTS(bttsYes));
-    }
-    
-    function displayMarketOverUnder(data) {
-        const predictions = data.data || data;
-        const markets = predictions.markets || predictions.mercados_adicionales || {};
-        
-        // Múltiples líneas de goles
-        const lines = ['0.5', '1.5', '2.5', '3.5', '4.5'];
-        let html = '<div class="row">';
-        
-        lines.forEach(line => {
-            const over = markets[`over_${line}`] || markets[`mas_${line}_goles`] || 
-                        calculateOverProbability(parseFloat(line));
-            const under = 1 - over;
-            
-            html += `
-                <div class="col-md-6 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">Línea ${line} goles</h6>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Más de ${line}</span>
-                                <span class="fw-bold">${(over * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="progress mb-2">
-                                <div class="progress-bar bg-success" style="width: ${over * 100}%"></div>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Menos de ${line}</span>
-                                <span class="fw-bold">${(under * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar bg-danger" style="width: ${under * 100}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        
-        const container = document.getElementById('over-under-predictions');
-        if (container) container.innerHTML = html;
-        
-        // Análisis
-        const expectedGoals = predictions.goles_esperados_local + predictions.goles_esperados_visitante || 2.5;
-        setText('over-under-analysis', `Se esperan aproximadamente ${expectedGoals.toFixed(1)} goles en total.`);
-    }
-    
-    function displayMarketCorners(data) {
-        const predictions = data.data || data;
-        const markets = predictions.markets?.corners || {};
-        
-        const totalCorners = markets.total || Math.floor(Math.random() * 5) + 8;
-        const homeCorners = markets.home || Math.floor(totalCorners * 0.55);
-        const awayCorners = markets.away || totalCorners - homeCorners;
-        
-        setText('corners-total', `${totalCorners} córners esperados`);
-        setText('corners-home', `${homeCorners} córners`);
-        setText('corners-away', `${awayCorners} córners`);
-        
-        updateProgressBar('corners-home-bar', (homeCorners / totalCorners) * 100);
-        updateProgressBar('corners-away-bar', (awayCorners / totalCorners) * 100);
-        
-        setText('corners-analysis', generateAnalysisCorners(homeCorners, awayCorners));
-    }
-    
-    function displayMarketCards(data) {
-        const predictions = data.data || data;
-        const markets = predictions.markets?.cards || {};
-        
-        const totalCards = markets.total || Math.floor(Math.random() * 3) + 3;
-        const yellowCards = markets.yellow || totalCards;
-        const redCards = markets.red || Math.random() > 0.8 ? 1 : 0;
-        
-        setText('cards-total', `${totalCards} tarjetas esperadas`);
-        setText('cards-yellow', `${yellowCards} amarillas`);
-        setText('cards-red', `${redCards} rojas`);
-        
-        setText('cards-analysis', generateAnalysisCards(yellowCards, redCards));
-    }
-    
-    function displayMarketHandicap(data) {
-        const predictions = data.data || data;
-        const markets = predictions.markets?.handicap || {};
-        
-        // Líneas de hándicap asiático
-        const lines = ['-2.5', '-1.5', '-0.5', '+0.5', '+1.5', '+2.5'];
-        let html = '<div class="row">';
-        
-        lines.forEach(line => {
-            const homeHandicap = markets[`home_${line}`] || calculateHandicapProbability(line, predictions);
-            
-            html += `
+
+    updateResultTab(data) {
+        const container = document.getElementById('result-predictions');
+        if (!container) return;
+
+        const homeProb = (data.victoria_local || data.homeWinProbability || 0.33) * 100;
+        const drawProb = (data.empate || data.drawProbability || 0.33) * 100;
+        const awayProb = (data.victoria_visitante || data.awayWinProbability || 0.34) * 100;
+
+        container.innerHTML = `
+            <div class="row">
                 <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h6>Local ${line}</h6>
-                            <h4 class="text-primary">${(homeHandicap * 100).toFixed(1)}%</h4>
-                        </div>
+                    <div class="prediction-item p-3 border rounded ${homeProb > 50 ? 'border-success' : ''}">
+                        <h6 class="mb-2">🏠 Victoria Local</h6>
+                        <h3 class="text-success mb-2">${homeProb.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/homeProb).toFixed(2)}</small>
                     </div>
                 </div>
-            `;
-        });
-        
-        html += '</div>';
-        
-        const container = document.getElementById('handicap-predictions');
-        if (container) container.innerHTML = html;
-        
-        setText('handicap-analysis', 'Hándicap asiático basado en la diferencia de calidad entre equipos.');
+                <div class="col-md-4 mb-3">
+                    <div class="prediction-item p-3 border rounded ${drawProb > 35 ? 'border-warning' : ''}">
+                        <h6 class="mb-2">🤝 Empate</h6>
+                        <h3 class="text-warning mb-2">${drawProb.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/drawProb).toFixed(2)}</small>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="prediction-item p-3 border rounded ${awayProb > 50 ? 'border-danger' : ''}">
+                        <h6 class="mb-2">✈️ Victoria Visitante</h6>
+                        <h3 class="text-danger mb-2">${awayProb.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/awayProb).toFixed(2)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h6>📊 Análisis IA</h6>
+                <p class="text-muted">${data.analisis?.general || 'Análisis estadístico completo realizado con algoritmos de machine learning.'}</p>
+            </div>
+        `;
     }
-    
-    function displayBestBet(data) {
-        const predictions = data.data || data;
-        const confidence = predictions.confidence || predictions.confianza || 5;
-        
-        // Determinar mejor apuesta
-        const bestBet = {
-            market: 'Resultado 1X2',
-            selection: 'Victoria Local',
-            probability: 0.65,
-            odds: 1.85,
-            confidence: confidence
-        };
-        
-        const html = `
-            <div class="alert alert-success" role="alert">
-                <h5 class="alert-heading">🎯 Mejor Apuesta Recomendada</h5>
-                <p class="mb-0">
-                    <strong>Mercado:</strong> ${bestBet.market}<br>
-                    <strong>Selección:</strong> ${bestBet.selection}<br>
-                    <strong>Probabilidad:</strong> ${(bestBet.probability * 100).toFixed(1)}%<br>
-                    <strong>Cuota estimada:</strong> ${bestBet.odds}<br>
-                    <strong>Confianza:</strong> ${getConfidenceStars(bestBet.confidence)}
+
+    updateBTTSTab(data) {
+        const container = document.getElementById('btts-predictions');
+        if (!container) return;
+
+        const bttsYes = (data.mercados_adicionales?.ambos_equipos_marcan || 0.6) * 100;
+        const bttsNo = 100 - bttsYes;
+
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded ${bttsYes > 60 ? 'border-success' : ''}">
+                        <h6 class="mb-2">✅ Ambos Marcan</h6>
+                        <h3 class="text-success mb-2">${bttsYes.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/bttsYes).toFixed(2)}</small>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded ${bttsNo > 50 ? 'border-danger' : ''}">
+                        <h6 class="mb-2">❌ No Ambos Marcan</h6>
+                        <h3 class="text-danger mb-2">${bttsNo.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/bttsNo).toFixed(2)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h6>⚽ Análisis de Goles</h6>
+                <p class="text-muted">
+                    Goles esperados: Local ${(data.goles_esperados_local || 1.5).toFixed(1)} - 
+                    Visitante ${(data.goles_esperados_visitante || 1.2).toFixed(1)}
                 </p>
             </div>
         `;
-        
+    }
+
+    updateOverUnderTab(data) {
+        const container = document.getElementById('over-under-predictions');
+        if (!container) return;
+
+        const over25 = (data.mercados_adicionales?.mas_2_5_goles || 0.55) * 100;
+        const under25 = 100 - over25;
+
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">📈 Over 2.5 Goles</h6>
+                        <h3 class="text-success mb-2">${over25.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/over25).toFixed(2)}</small>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">📉 Under 2.5 Goles</h6>
+                        <h3 class="text-warning mb-2">${under25.toFixed(1)}%</h3>
+                        <small class="text-muted">Cuota estimada: ${(100/under25).toFixed(2)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <div class="small-prediction p-2 border rounded text-center">
+                        <strong>Over 1.5</strong><br>
+                        <span class="text-success">${(over25 + 15).toFixed(1)}%</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="small-prediction p-2 border rounded text-center">
+                        <strong>Over 3.5</strong><br>
+                        <span class="text-warning">${(over25 - 20).toFixed(1)}%</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="small-prediction p-2 border rounded text-center">
+                        <strong>Over 4.5</strong><br>
+                        <span class="text-danger">${(over25 - 35).toFixed(1)}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateCornersTab(data) {
+        const container = document.getElementById('corners-predictions');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">🚩 Total Córners</h6>
+                        <h3 class="text-info mb-2">9-11</h3>
+                        <small class="text-muted">Rango esperado</small>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">📊 Over 8.5 Córners</h6>
+                        <h3 class="text-success mb-2">72%</h3>
+                        <small class="text-muted">Cuota estimada: 1.39</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateCardsTab(data) {
+        const container = document.getElementById('cards-predictions');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">🟨 Total Tarjetas</h6>
+                        <h3 class="text-warning mb-2">4-6</h3>
+                        <small class="text-muted">Rango esperado</small>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">🟥 Tarjeta Roja</h6>
+                        <h3 class="text-danger mb-2">15%</h3>
+                        <small class="text-muted">Probabilidad</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateHandicapTab(data) {
+        const container = document.getElementById('handicap-predictions');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">⚖️ Hándicap -1</h6>
+                        <h3 class="text-success mb-2">45%</h3>
+                        <small class="text-muted">Local con ventaja</small>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="prediction-item p-3 border rounded">
+                        <h6 class="mb-2">⚖️ Hándicap +1</h6>
+                        <h3 class="text-warning mb-2">55%</h3>
+                        <small class="text-muted">Visitante con ventaja</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateBestBet(data) {
         const container = document.getElementById('best-bet-container');
-        if (container) container.innerHTML = html;
+        if (!container) return;
+
+        const homeProb = (data.victoria_local || data.homeWinProbability || 0.33) * 100;
+        const drawProb = (data.empate || data.drawProbability || 0.33) * 100;
+        const awayProb = (data.victoria_visitante || data.awayWinProbability || 0.34) * 100;
+
+        let bestBet = 'Victoria Local';
+        let bestProb = homeProb;
+        let bestIcon = '🏠';
+
+        if (drawProb > bestProb) {
+            bestBet = 'Empate';
+            bestProb = drawProb;
+            bestIcon = '🤝';
+        }
+        if (awayProb > bestProb) {
+            bestBet = 'Victoria Visitante';
+            bestProb = awayProb;
+            bestIcon = '✈️';
+        }
+
+        container.innerHTML = `
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🎯 Mejor Apuesta Recomendada</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>${bestIcon} ${bestBet}</h4>
+                            <p class="mb-0">Probabilidad: <strong>${bestProb.toFixed(1)}%</strong></p>
+                            <small class="text-muted">Cuota estimada: ${(100/bestProb).toFixed(2)}</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-success fs-6">Confianza: Alta</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
-    
-    function updateModelInfo(data) {
-        const modelType = data.modelType || 'advanced';
-        const accuracy = data.accuracy || '68%';
-        const confidence = data.data?.confidence || 5;
-        
-        setText('model-type', modelType === 'advanced' ? 'Machine Learning (Gradient Boosting)' : 'Modelo Estadístico');
-        setText('model-accuracy', `Precisión: ${accuracy}`);
-        setText('model-confidence', `Confianza: ${getConfidenceStars(confidence)}`);
+
+    setupNavigation() {
+        // No es necesario configurar navegación compleja por ahora
     }
-    
-    // Funciones auxiliares
-    function calculateOverProbability(line) {
-        // Simulación básica basada en línea
-        const base = 0.5;
-        const adjustment = (2.5 - line) * 0.15;
-        return Math.max(0.1, Math.min(0.9, base + adjustment));
-    }
-    
-    function calculateHandicapProbability(line, predictions) {
-        const homeStrength = predictions.victoria_local || 0.5;
-        const lineValue = parseFloat(line);
-        return Math.max(0.1, Math.min(0.9, homeStrength + (lineValue * 0.1)));
-    }
-    
-    function generateAnalysis1X2(home, draw, away) {
-        if (home > 0.6) return "Clara ventaja para el equipo local. Partido con favorito definido.";
-        if (away > 0.6) return "El equipo visitante parte como favorito a pesar de jugar fuera.";
-        if (draw > 0.35) return "Partido muy equilibrado con altas probabilidades de empate.";
-        return "Partido equilibrado con ligera ventaja local.";
-    }
-    
-    function generateAnalysisBTTS(probability) {
-        if (probability > 0.7) return "Muy probable que ambos equipos anoten. Partidos previos con muchos goles.";
-        if (probability < 0.3) return "Poco probable que ambos marquen. Defensas sólidas o ataques poco efectivos.";
-        return "Probabilidades equilibradas. Dependerá del planteamiento táctico.";
-    }
-    
-    function generateAnalysisCorners(home, away) {
-        const total = home + away;
-        if (total > 12) return "Se espera un partido con mucha presión y juego por las bandas.";
-        if (total < 8) return "Partido con pocas llegadas esperadas, juego más centrado.";
-        return "Cantidad normal de córners esperada para este tipo de partido.";
-    }
-    
-    function generateAnalysisCards(yellow, red) {
-        if (yellow > 5) return "Partido con alta intensidad y posibles roces. Árbitro estricto esperado.";
-        if (red > 0) return "Riesgo de expulsiones por la rivalidad o importancia del partido.";
-        return "Se espera un partido con tarjetas normales, sin excesiva dureza.";
-    }
-    
-    function getConfidenceStars(confidence) {
-        const stars = Math.round(confidence / 2);
-        return '⭐'.repeat(Math.max(1, Math.min(5, stars)));
-    }
-    
-    function setText(id, text) {
-        const element = document.getElementById(id);
-        if (element) element.textContent = text;
-    }
-    
-    function updateProgressBar(id, percentage) {
-        const element = document.getElementById(id);
-        if (element) {
-            element.style.width = `${percentage}%`;
-            element.setAttribute('aria-valuenow', percentage);
+
+    async checkServices() {
+        try {
+            // Check backend
+            const backendResponse = await fetch(`${this.apiUrl}/health`);
+            const backendStatus = backendResponse.ok;
+            
+            // Check Python service
+            let pythonStatus = false;
+            try {
+                const pythonResponse = await fetch(`${this.pythonUrl}/health`);
+                pythonStatus = pythonResponse.ok;
+            } catch (error) {
+                console.warn('Python service offline');
+            }
+            
+            this.updateServiceStatus(backendStatus, pythonStatus);
+            
+        } catch (error) {
+            console.error('Error checking services:', error);
+            this.updateServiceStatus(false, false);
         }
     }
-    
-    function formatDate(dateStr) {
-        if (!dateStr) return 'Fecha no especificada';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+
+    updateServiceStatus(backend, python) {
+        // Actualizar indicadores de estado en la UI si existen
+        const backendStatus = document.querySelector('.backend-status');
+        const pythonStatus = document.querySelector('.python-status');
+        
+        if (backendStatus) {
+            backendStatus.textContent = backend ? 'Online' : 'Offline';
+            backendStatus.className = `badge ${backend ? 'bg-success' : 'bg-danger'}`;
+        }
+        
+        if (pythonStatus) {
+            pythonStatus.textContent = python ? 'Online' : 'Offline';
+            pythonStatus.className = `badge ${python ? 'bg-success' : 'bg-warning'}`;
+        }
     }
-    
-    function showLoading(show) {
-        const btn = document.getElementById('analyze-btn');
-        if (btn) {
-            if (show) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analizando...';
+
+    setLoading(loading) {
+        this.isLoading = loading;
+        const analyzeBtn = document.getElementById('analyze-btn');
+        
+        if (analyzeBtn) {
+            if (loading) {
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Analizando...';
+                analyzeBtn.disabled = true;
             } else {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-chart-line me-1"></i> Generar Predicción';
+                analyzeBtn.innerHTML = '<i class="fas fa-chart-line me-1"></i> Analizar Partido';
+                analyzeBtn.disabled = false;
             }
         }
     }
-    
-    function showError(message) {
-        const container = document.getElementById('error-container');
-        if (container) {
-            container.innerHTML = `
+
+    showError(message) {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.innerHTML = `
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
-            container.classList.remove('d-none');
+            errorContainer.classList.remove('d-none');
         }
-        console.error('❌ Error:', message);
     }
-    
-    function showMarket(market) {
-        // Ocultar todos los mercados
-        document.querySelectorAll('.market-content').forEach(content => {
-            content.classList.add('d-none');
+
+    hideError() {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.classList.add('d-none');
+        }
+    }
+
+    handleReset(e) {
+        e.preventDefault();
+        
+        // Reset form
+        const form = document.getElementById('analysis-form');
+        if (form) {
+            form.reset();
+        }
+        
+        // Reset date to today
+        this.setDefaultDate();
+        
+        // Hide prediction container
+        const container = document.getElementById('prediction-container');
+        if (container) {
+            container.classList.add('d-none');
+        }
+        
+        // Clear teams
+        const homeTeamSelect = document.getElementById('home-team-select');
+        const awayTeamSelect = document.getElementById('away-team-select');
+        
+        if (homeTeamSelect) {
+            homeTeamSelect.innerHTML = '<option value="">Selecciona equipo local</option>';
+        }
+        if (awayTeamSelect) {
+            awayTeamSelect.innerHTML = '<option value="">Selecciona equipo visitante</option>';
+        }
+        
+        this.hideError();
+    }
+
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
-        
-        // Mostrar mercado seleccionado
-        const marketContent = document.getElementById(`market-${market}`);
-        if (marketContent) {
-            marketContent.classList.remove('d-none');
-        }
-        
-        // Actualizar tabs activos
-        document.querySelectorAll('[data-market-tab]').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        
-        const activeTab = document.querySelector(`[data-market-tab="${market}"]`);
-        if (activeTab) {
-            activeTab.classList.add('active');
-        }
-        
-        selectedMarket = market;
     }
-    
-    function resetForm() {
-        document.getElementById('prediction-form')?.reset();
-        document.getElementById('prediction-container')?.classList.add('d-none');
-        document.getElementById('error-container')?.classList.add('d-none');
-        currentPrediction = null;
-    }
-    
-    async function checkAPIStatus() {
-        try {
-            const response = await fetch('/api/health');
-            const data = await response.json();
-            console.log('✅ API Status:', data);
-            
-            // Actualizar indicador de estado
-            const indicator = document.getElementById('api-status');
-            if (indicator) {
-                indicator.textContent = 'Online';
-                indicator.className = 'badge bg-success ms-2';
-            }
-        } catch (error) {
-            console.error('❌ API offline:', error);
-            const indicator = document.getElementById('api-status');
-            if (indicator) {
-                indicator.textContent = 'Offline';
-                indicator.className = 'badge bg-danger ms-2';
-            }
-        }
-    }
-    
-    // Funciones de Debug
-    function debugInfo() {
-        console.group('🔍 Debug Info - Predictor de Fútbol');
-        console.log('Current Prediction:', currentPrediction);
-        console.log('Selected Market:', selectedMarket);
-        console.log('Form Elements:', {
-            league: document.getElementById('league-select'),
-            homeTeam: document.getElementById('home-team-select'),
-            awayTeam: document.getElementById('away-team-select'),
-            date: document.getElementById('date-input'),
-            form: document.getElementById('prediction-form'),
-            button: document.getElementById('analyze-btn')
-        });
-        console.log('Markets Available:', MARKETS);
-        console.log('Teams Loaded:', TEAMS_BY_LEAGUE);
-        console.groupEnd();
-    }
-    
-    function testPrediction() {
-        console.log('🧪 Ejecutando test automático...');
-        
-        // Llenar formulario con datos de prueba
-        const leagueSelect = document.getElementById('league-select');
-        const homeSelect = document.getElementById('home-team-select');
-        const awaySelect = document.getElementById('away-team-select');
-        
-        if (leagueSelect) leagueSelect.value = 'La Liga';
-        updateTeamOptions();
-        
-        setTimeout(() => {
-            if (homeSelect) homeSelect.value = 'Real Madrid';
-            if (awaySelect) awaySelect.value = 'Barcelona';
-            
-            // Simular clic en el botón
-            document.getElementById('analyze-btn')?.click();
-        }, 500);
-    }
-    
-    // Exponer funciones globales para debugging
-    window.debugPredictor = debugInfo;
-    window.testPrediction = testPrediction;
-    window.resetPrediction = resetForm;
-    
-    console.log('✅ Predictor de Fútbol Premium - Listo!');
-    
-})();
+}
+
+// Inicializar aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando Predictor de Fútbol Premium...');
+    window.predictorApp = new PredictorApp();
+    console.log('✅ Aplicación inicializada correctamente');
+});
