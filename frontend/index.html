@@ -8,8 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Estilos personalizados -->
     <style>
         :root {
@@ -77,15 +75,28 @@
             padding: 0.5rem 1rem;
             border-radius: 5px;
             margin: 0 0.25rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
         }
         
         .market-tab:hover {
             background-color: rgba(0,123,255,0.1);
+            border-color: #007bff;
         }
         
         .market-tab.active {
             background-color: #007bff;
             color: white;
+            border-color: #007bff;
+        }
+        
+        .market-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .market-content.active {
+            display: block;
         }
         
         .progress {
@@ -125,27 +136,18 @@
             margin: 0 auto 1rem;
         }
         
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
+        .prediction-item {
+            background: white;
+            transition: all 0.3s ease;
         }
         
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+        .prediction-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .loading-overlay.show {
-            display: flex;
+        .small-prediction {
+            background: #f8f9fa;
         }
         
         .ai-badge {
@@ -171,16 +173,6 @@
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="text-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="visually-hidden">Cargando...</span>
-            </div>
-            <p class="text-white mt-3">Analizando con IA...</p>
-        </div>
-    </div>
-
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
@@ -201,24 +193,11 @@
                         <a class="nav-link active" href="#">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="testPrediction(); return false;">Test</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="debugPredictor(); return false;">Debug</a>
-                    </li>
-                    <li class="nav-item">
                         <span class="nav-link">
                             API Status: <span id="api-status" class="badge bg-success">Online</span>
                         </span>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center ms-3">
-                    <span class="text-light me-2">ML</span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="ml-toggle" checked>
-                    </div>
-                    <span class="text-light ms-2">Stats</span>
-                </div>
             </div>
         </div>
     </nav>
@@ -247,16 +226,11 @@
             <div class="card-body">
                 <div id="error-container" class="d-none"></div>
                 
-                <form id="prediction-form" class="row g-3">
+                <form id="analysis-form" class="row g-3">
                     <div class="col-md-6">
                         <label for="league-select" class="form-label">Liga</label>
                         <select id="league-select" class="form-select" required>
                             <option value="">Selecciona una liga</option>
-                            <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
-                            <option value="La Liga">🇪🇸 La Liga</option>
-                            <option value="Serie A">🇮🇹 Serie A</option>
-                            <option value="Bundesliga">🇩🇪 Bundesliga</option>
-                            <option value="Ligue 1">🇫🇷 Ligue 1</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -305,14 +279,12 @@
                 <div class="row align-items-center">
                     <div class="col-md-5 text-center">
                         <h3 id="home-team-name" class="mb-3">Equipo Local</h3>
-                        <img id="home-team-logo" src="" alt="Logo" class="team-logo d-none">
                     </div>
                     <div class="col-md-2 text-center my-3 my-md-0">
                         <span class="vs-badge">VS</span>
                     </div>
                     <div class="col-md-5 text-center">
                         <h3 id="away-team-name" class="mb-3">Equipo Visitante</h3>
-                        <img id="away-team-logo" src="" alt="Logo" class="team-logo d-none">
                     </div>
                 </div>
                 <hr>
@@ -339,195 +311,73 @@
         <!-- Navegación de mercados -->
         <div class="card shadow-sm mb-4">
             <div class="card-header">
-                <div class="d-flex flex-wrap justify-content-center">
-                    <span class="market-tab active" data-market-tab="1x2">
+                <div class="d-flex flex-wrap justify-content-center" id="market-tabs">
+                    <span class="market-tab active" data-market="1x2">
                         <i class="fas fa-poll me-1"></i> Resultado
                     </span>
-                    <span class="market-tab" data-market-tab="btts">
+                    <span class="market-tab" data-market="btts">
                         <i class="fas fa-futbol me-1"></i> BTTS
                     </span>
-                    <span class="market-tab" data-market-tab="over-under">
+                    <span class="market-tab" data-market="over-under">
                         <i class="fas fa-chart-line me-1"></i> Goles
                     </span>
-                    <span class="market-tab" data-market-tab="corners">
+                    <span class="market-tab" data-market="corners">
                         <i class="fas fa-flag me-1"></i> Córners
                     </span>
-                    <span class="market-tab" data-market-tab="cards">
+                    <span class="market-tab" data-market="cards">
                         <i class="fas fa-square me-1"></i> Tarjetas
                     </span>
-                    <span class="market-tab" data-market-tab="handicap">
+                    <span class="market-tab" data-market="handicap">
                         <i class="fas fa-balance-scale me-1"></i> Hándicap
                     </span>
                 </div>
             </div>
             <div class="card-body">
                 <!-- Mercado 1X2 -->
-                <div id="market-1x2" class="market-content">
+                <div id="market-1x2" class="market-content active">
                     <h5 class="card-title mb-4">Predicción de Resultado (1X2)</h5>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="prediction-card card h-100 confidence-high">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">🏠 Victoria Local</h5>
-                                    <h2 id="home-win-prob" class="text-success">0.0%</h2>
-                                    <div class="progress mt-3">
-                                        <div id="home-win-bar" class="progress-bar bg-success" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="prediction-card card h-100 confidence-medium">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">🤝 Empate</h5>
-                                    <h2 id="draw-prob" class="text-warning">0.0%</h2>
-                                    <div class="progress mt-3">
-                                        <div id="draw-bar" class="progress-bar bg-warning" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="prediction-card card h-100 confidence-low">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">✈️ Victoria Visitante</h5>
-                                    <h2 id="away-win-prob" class="text-danger">0.0%</h2>
-                                    <div class="progress mt-3">
-                                        <div id="away-bar" class="progress-bar bg-danger" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="result-analysis">Análisis pendiente...</span>
+                    <div id="result-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
                 <!-- Mercado BTTS -->
-                <div id="market-btts" class="market-content d-none">
+                <div id="market-btts" class="market-content">
                     <h5 class="card-title mb-4">Ambos Equipos Marcan (BTTS)</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h5>✅ Sí</h5>
-                                    <h2 id="btts-yes-prob" class="text-success">0.0%</h2>
-                                    <div class="progress mt-3">
-                                        <div id="btts-yes-bar" class="progress-bar bg-success" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h5>❌ No</h5>
-                                    <h2 id="btts-no-prob" class="text-danger">0.0%</h2>
-                                    <div class="progress mt-3">
-                                        <div id="btts-no-bar" class="progress-bar bg-danger" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="btts-analysis">Análisis pendiente...</span>
+                    <div id="btts-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
                 <!-- Mercado Over/Under -->
-                <div id="market-over-under" class="market-content d-none">
+                <div id="market-over-under" class="market-content">
                     <h5 class="card-title mb-4">Goles Totales (Over/Under)</h5>
-                    <div id="over-under-predictions"></div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="over-under-analysis">Análisis pendiente...</span>
+                    <div id="over-under-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
                 <!-- Mercado Córners -->
-                <div id="market-corners" class="market-content d-none">
+                <div id="market-corners" class="market-content">
                     <h5 class="card-title mb-4">Predicción de Córners</h5>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <div class="text-center mb-4">
-                                <h3><i class="fas fa-flag text-primary"></i> <span id="corners-total">0 córners esperados</span></h3>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6>Equipo Local</h6>
-                                    <p class="mb-2" id="corners-home">0 córners</p>
-                                    <div class="progress">
-                                        <div id="corners-home-bar" class="progress-bar bg-primary" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6>Equipo Visitante</h6>
-                                    <p class="mb-2" id="corners-away">0 córners</p>
-                                    <div class="progress">
-                                        <div id="corners-away-bar" class="progress-bar bg-info" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="corners-analysis">Análisis pendiente...</span>
+                    <div id="corners-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
                 <!-- Mercado Tarjetas -->
-                <div id="market-cards" class="market-content d-none">
+                <div id="market-cards" class="market-content">
                     <h5 class="card-title mb-4">Predicción de Tarjetas</h5>
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6>Total Esperado</h6>
-                                    <h3><i class="fas fa-square text-warning"></i> <span id="cards-total">0</span></h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6>Amarillas</h6>
-                                    <h3><i class="fas fa-square text-warning"></i> <span id="cards-yellow">0</span></h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6>Rojas</h6>
-                                    <h3><i class="fas fa-square text-danger"></i> <span id="cards-red">0</span></h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="cards-analysis">Análisis pendiente...</span>
+                    <div id="cards-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
 
                 <!-- Mercado Hándicap -->
-                <div id="market-handicap" class="market-content d-none">
+                <div id="market-handicap" class="market-content">
                     <h5 class="card-title mb-4">Hándicap Asiático</h5>
-                    <div id="handicap-predictions"></div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <span id="handicap-analysis">Análisis pendiente...</span>
+                    <div id="handicap-predictions">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -548,46 +398,6 @@
                     </div>
                     <div class="col-md-4">
                         <strong>Confianza:</strong> <span id="model-confidence">⭐⭐⭐⭐</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sección de características -->
-    <div class="container my-5">
-        <h2 class="text-center mb-4">Tecnología Avanzada</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="feature-icon bg-primary text-white">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <h5 class="card-title">Inteligencia Artificial</h5>
-                        <p class="card-text">Algoritmos de Machine Learning entrenados con miles de partidos históricos para predicciones precisas.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="feature-icon bg-success text-white">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h5 class="card-title">Análisis Estadístico</h5>
-                        <p class="card-text">Procesamiento de estadísticas avanzadas: forma reciente, head-to-head, y factores contextuales.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="feature-icon bg-info text-white">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h5 class="card-title">Respuesta Rápida</h5>
-                        <p class="card-text">Predicciones generadas en tiempo real con sistema de fallback para máxima disponibilidad.</p>
                     </div>
                 </div>
             </div>
@@ -619,132 +429,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
-    <script>
-        // Configurar fecha de hoy por defecto
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.getElementById('date-input');
-            if (dateInput) {
-                dateInput.value = new Date().toISOString().split('T')[0];
-            }
-        });
-    </script>
-<!-- AÑADIR ESTE CSS AL FINAL DE frontend/index.html, ANTES DE </body> -->
-
-<style>
-/* 🛠️ CSS OVERRIDE - Arregla errores de Bootstrap utilities */
-
-/* 1. Arreglar column-gap deprecado */
-.row, .container, .container-fluid {
-    gap: inherit !important;
-    column-gap: inherit !important;
-}
-
-/* 2. Forzar visibilidad de pestañas de predicción */
-#predictionTabContent {
-    display: block !important;
-    min-height: 400px;
-}
-
-.tab-pane {
-    display: none;
-    padding: 20px 0;
-}
-
-.tab-pane.active, .tab-pane.show {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
-/* 3. Contenedores de predicciones */
-.prediction-results {
-    display: block !important;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 10px 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* 4. Probabilidades visibles */
-.probability-display {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #007bff;
-    text-align: center;
-    margin: 15px 0;
-}
-
-/* 5. Análisis de mercados */
-.market-analysis {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-    margin-top: 15px;
-    border-left: 4px solid #28a745;
-}
-
-/* 6. Cards de resultados */
-.result-card, .btts-card, .over-under-card, 
-.corners-card, .cards-card, .handicap-card {
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    min-height: 200px;
-}
-
-/* 7. Debug temporal - quitar después */
-.tab-pane.active {
-    border: 2px solid green !important;
-    background: rgba(0,255,0,0.05) !important;
-}
-
-/* 8. Texto visible */
-.prediction-text, .analysis-text {
-    color: #333 !important;
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
-/* 9. Botones y navegación */
-.nav-tabs .nav-link {
-    color: #495057 !important;
-}
-
-.nav-tabs .nav-link.active {
-    background-color: #fff !important;
-    border-color: #dee2e6 #dee2e6 #fff !important;
-}
-</style>
-
-<!-- Script para debug temporal -->
-<script>
-// Debug: Forzar visibilidad de pestañas
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 CSS Override cargado - buscando pestañas...');
-    
-    // Verificar que las pestañas existen
-    const tabs = document.querySelectorAll('.tab-pane');
-    console.log(`📋 Encontradas ${tabs.length} pestañas`);
-    
-    // Forzar visibilidad de la primera pestaña
-    if (tabs.length > 0) {
-        tabs[0].classList.add('active', 'show');
-        console.log('✅ Primera pestaña activada');
-    }
-    
-    // Debug info cada 3 segundos
-    setInterval(() => {
-        const activeTab = document.querySelector('.tab-pane.active');
-        if (activeTab) {
-            console.log('✅ Pestaña activa encontrada:', activeTab.id);
-        } else {
-            console.log('❌ No hay pestañas activas');
-        }
-    }, 3000);
-});
-</script>
 </body>
 </html>
