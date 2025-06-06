@@ -4,28 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predictor de Fútbol Premium - IA Avanzada</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
+        * {
+            font-family: 'Inter', sans-serif;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .hero-section {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, 
+                rgba(102, 126, 234, 0.9) 0%, 
+                rgba(118, 75, 162, 0.9) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            padding: 80px 0;
+            text-align: center;
             color: white;
-            padding: 4rem 0;
             position: relative;
             overflow: hidden;
         }
@@ -34,155 +57,319 @@
             content: '';
             position: absolute;
             top: -50%;
-            right: -50%;
+            left: -50%;
             width: 200%;
             height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></svg>') repeat;
-            animation: rotate 60s linear infinite;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s infinite linear;
         }
         
-        @keyframes rotate {
-            to { transform: rotate(360deg); }
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        .prediction-card {
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .feature-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
-        .prediction-card:hover {
+        .feature-badge:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
         }
         
-        .confidence-high {
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .confidence-medium {
-            border-left: 4px solid var(--warning-color);
-        }
-        
-        .confidence-low {
-            border-left: 4px solid var(--danger-color);
-        }
-        
-        .market-tab {
-            cursor: pointer;
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            font-weight: 500;
             transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            margin: 0 0.25rem;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
+            background: rgba(255, 255, 255, 0.8);
         }
         
-        .market-tab:hover {
-            background-color: rgba(0,123,255,0.1);
-            border-color: #007bff;
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: rgba(255, 255, 255, 1);
         }
         
-        .market-tab.active {
-            background-color: #007bff;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-online {
+            background: rgba(40, 167, 69, 0.9);
             color: white;
-            border-color: #007bff;
         }
         
-        .market-content {
-            display: none;
-            padding: 20px 0;
+        .status-offline {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
         }
         
-        .market-content.active {
+        .ai-info-card {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .ai-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .ai-stat {
+            text-align: center;
+        }
+        
+        .ai-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
             display: block;
         }
         
-        .progress {
-            height: 25px;
+        .ai-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .prediction-result {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .match-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 15px;
-            background-color: #e9ecef;
+            margin-bottom: 25px;
         }
         
-        .progress-bar {
-            transition: width 1s ease-in-out;
-            border-radius: 15px;
-        }
-        
-        .team-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-        }
-        
-        .vs-badge {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+        .team-vs {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 1rem;
+            gap: 20px;
+            margin: 15px 0;
         }
         
-        .prediction-item {
-            background: white;
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .vs-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .probability-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
             transition: all 0.3s ease;
         }
         
-        .prediction-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .probability-card:hover {
+            transform: translateY(-3px);
         }
         
-        .small-prediction {
-            background: #f8f9fa;
+        .probability-percentage {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
         }
         
-        .ai-badge {
-            background: linear-gradient(45deg, #00b4d8, #0077b6);
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 12px 20px;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
-        .ai-badge i {
-            animation: pulse 2s infinite;
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
         }
         
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .floating-icon {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            animation: float-icon 15s infinite linear;
+        }
+        
+        @keyframes float-icon {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+        
+        .floating-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { left: 20%; animation-delay: 2s; }
+        .floating-icon:nth-child(3) { left: 30%; animation-delay: 4s; }
+        .floating-icon:nth-child(4) { left: 40%; animation-delay: 6s; }
+        .floating-icon:nth-child(5) { left: 50%; animation-delay: 8s; }
+        .floating-icon:nth-child(6) { left: 60%; animation-delay: 10s; }
+        .floating-icon:nth-child(7) { left: 70%; animation-delay: 12s; }
+        .floating-icon:nth-child(8) { left: 80%; animation-delay: 14s; }
+        .floating-icon:nth-child(9) { left: 90%; animation-delay: 16s; }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .feature-badges {
+                justify-content: center;
+            }
+            
+            .glass-card {
+                margin: 10px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Elementos flotantes de fondo -->
+    <div class="floating-elements">
+        <i class="fas fa-futbol floating-icon" style="font-size: 30px;"></i>
+        <i class="fas fa-chart-line floating-icon" style="font-size: 25px;"></i>
+        <i class="fas fa-brain floating-icon" style="font-size: 28px;"></i>
+        <i class="fas fa-trophy floating-icon" style="font-size: 32px;"></i>
+        <i class="fas fa-target floating-icon" style="font-size: 26px;"></i>
+        <i class="fas fa-bolt floating-icon" style="font-size: 24px;"></i>
+        <i class="fas fa-star floating-icon" style="font-size: 27px;"></i>
+        <i class="fas fa-fire floating-icon" style="font-size: 29px;"></i>
+        <i class="fas fa-gem floating-icon" style="font-size: 31px;"></i>
+    </div>
+
+    <!-- Status Indicator -->
+    <div id="status-indicator" class="status-indicator status-online">
+        <i class="fas fa-wifi me-2"></i>IA Online
+    </div>
+
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand" href="#">
                 <i class="fas fa-futbol me-2"></i>
-                <span>Predictor de Fútbol Premium</span>
-                <span class="ai-badge ms-3">
-                    <i class="fas fa-brain"></i>
-                    IA Activada
-                </span>
+                Predictor Premium
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -190,12 +377,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Inicio</a>
+                        <a class="nav-link" href="#predictor">Predictor</a>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link">
-                            API Status: <span id="api-status" class="badge bg-success">Online</span>
-                        </span>
+                        <a class="nav-link" href="#value-analyzer">Análisis de Valor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#statistics">Estadísticas</a>
                     </li>
                 </ul>
             </div>
@@ -203,231 +391,394 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container text-center position-relative">
-            <h1 class="display-4 fw-bold mb-3">Predicciones Premium de Fútbol</h1>
-            <p class="lead">Inteligencia Artificial avanzada para predecir resultados de fútbol</p>
-            <p class="mb-0">Algoritmos de Machine Learning para los mercados más populares</p>
-            <div class="mt-4">
-                <span class="badge bg-light text-dark me-2">Gradient Boosting</span>
-                <span class="badge bg-light text-dark me-2">+30 Features</span>
-                <span class="badge bg-light text-dark me-2">68% Precisión</span>
-                <span class="badge bg-light text-dark">6 Mercados</span>
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="container">
+                <h1 class="hero-title">Predictor de Fútbol Premium</h1>
+                <p class="hero-subtitle">
+                    Inteligencia Artificial avanzada para predicciones de fútbol profesionales
+                </p>
+                
+                <div class="feature-badges">
+                    <span class="feature-badge">
+                        <i class="fas fa-brain me-2"></i>Machine Learning
+                    </span>
+                    <span class="feature-badge">
+                        <i class="fas fa-chart-line me-2"></i>68% Precisión
+                    </span>
+                    <span class="feature-badge">
+                        <i class="fas fa-bolt me-2"></i>6 Mercados
+                    </span>
+                    <span class="feature-badge">
+                        <i class="fas fa-shield-alt me-2"></i>Análisis de Valor
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Formulario de análisis -->
-    <div class="container my-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-search me-2"></i>Analizar Partido</h4>
+    <!-- Main Content -->
+    <div class="container" style="margin-top: -50px; position: relative; z-index: 10;">
+        
+        <!-- AI Info Card -->
+        <div class="ai-info-card">
+            <h4><i class="fas fa-robot me-2"></i>Modelo de Inteligencia Artificial</h4>
+            <p>Gradient Boosting entrenado con miles de partidos históricos</p>
+            <div class="ai-stats">
+                <div class="ai-stat">
+                    <span class="ai-stat-number">68%</span>
+                    <span class="ai-stat-label">Precisión</span>
+                </div>
+                <div class="ai-stat">
+                    <span class="ai-stat-number">6</span>
+                    <span class="ai-stat-label">Mercados</span>
+                </div>
+                <div class="ai-stat">
+                    <span class="ai-stat-number">30+</span>
+                    <span class="ai-stat-label">Features</span>
+                </div>
+                <div class="ai-stat">
+                    <span class="ai-stat-number">Real-time</span>
+                    <span class="ai-stat-label">Análisis</span>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="error-container" class="d-none"></div>
-                
-                <form id="analysis-form" class="row g-3">
+        </div>
+
+        <!-- Predictor Form -->
+        <div id="predictor" class="glass-card">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-search me-2"></i>Analizar Partido
+            </h3>
+            
+            <form id="prediction-form">
+                <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="league-select" class="form-label">Liga</label>
+                        <label class="form-label fw-semibold">Liga</label>
                         <select id="league-select" class="form-select" required>
                             <option value="">Selecciona una liga</option>
+                            <option value="Argentina Liga Argentina">🇦🇷 Liga Argentina</option>
+                            <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+                            <option value="La Liga">🇪🇸 La Liga</option>
+                            <option value="Bundesliga">🇩🇪 Bundesliga</option>
+                            <option value="Serie A">🇮🇹 Serie A</option>
+                            <option value="Ligue 1">🇫🇷 Ligue 1</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="date-input" class="form-label">Fecha</label>
+                        <label class="form-label fw-semibold">Fecha</label>
                         <input type="date" id="date-input" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                        <label for="home-team-select" class="form-label">Equipo Local</label>
+                        <label class="form-label fw-semibold">Equipo Local</label>
                         <select id="home-team-select" class="form-select" required>
                             <option value="">Selecciona equipo local</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="away-team-select" class="form-label">Equipo Visitante</label>
+                        <label class="form-label fw-semibold">Equipo Visitante</label>
                         <select id="away-team-select" class="form-select" required>
                             <option value="">Selecciona equipo visitante</option>
                         </select>
                     </div>
-                    <div class="col-12 text-center">
-                        <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
-                            <i class="fas fa-brain me-2"></i>
-                            <span id="model-status">Predicción generada con Inteligencia Artificial avanzada</span>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-brain me-2"></i>Generar Predicción IA
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Prediction Results -->
+        <div id="prediction-results" class="prediction-result" style="display: none;">
+            <!-- Match Header -->
+            <div class="match-header">
+                <div class="team-vs">
+                    <span id="home-team-name" class="team-name">Equipo Local</span>
+                    <span class="vs-badge">VS</span>
+                    <span id="away-team-name" class="team-name">Equipo Visitante</span>
+                </div>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-calendar me-2"></i><span id="match-date-display"></span>
+                    <i class="fas fa-trophy ms-3 me-2"></i><span id="league-display"></span>
+                </p>
+            </div>
+
+            <!-- Probability Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="probability-card">
+                        <h6><i class="fas fa-home me-2"></i>Victoria Local</h6>
+                        <div id="home-probability" class="probability-percentage">0%</div>
+                        <small>Probabilidad de victoria</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="probability-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <h6><i class="fas fa-handshake me-2"></i>Empate</h6>
+                        <div id="draw-probability" class="probability-percentage">0%</div>
+                        <small>Probabilidad de empate</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="probability-card" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">
+                        <h6><i class="fas fa-plane me-2"></i>Victoria Visitante</h6>
+                        <div id="away-probability" class="probability-percentage">0%</div>
+                        <small>Probabilidad de victoria</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs for Different Markets -->
+            <ul class="nav nav-tabs" id="marketTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="btts-tab" data-bs-toggle="tab" data-bs-target="#btts" type="button" role="tab">
+                        <i class="fas fa-futbol me-2"></i>BTTS
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab">
+                        <i class="fas fa-chart-bar me-2"></i>Goles
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="value-tab" data-bs-toggle="tab" data-bs-target="#value" type="button" role="tab">
+                        <i class="fas fa-calculator me-2"></i>Valor
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="marketTabContent">
+                <div class="tab-pane fade show active" id="btts" role="tabpanel">
+                    <h5><i class="fas fa-futbol me-2"></i>Ambos Equipos Marcan</h5>
+                    <div id="btts-analysis"></div>
+                </div>
+                <div class="tab-pane fade" id="goals" role="tabpanel">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Análisis de Goles</h5>
+                    <div id="goals-analysis"></div>
+                </div>
+                <div class="tab-pane fade" id="value" role="tabpanel">
+                    <h5><i class="fas fa-calculator me-2"></i>Análisis de Valor</h5>
+                    <div id="value-analysis">
+                        <p class="text-muted">Ingresa las cuotas de tu casa de apuestas para analizar el valor:</p>
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Configuración inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Configurar fecha de hoy
+            document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+            
+            // Configurar equipos por liga
+            setupTeamsByLeague();
+            
+            // Event listeners
+            document.getElementById('league-select').addEventListener('change', updateTeamOptions);
+            document.getElementById('prediction-form').addEventListener('submit', handlePrediction);
+            
+            // Verificar estado de servicios
+            checkServicesStatus();
+        }
+
+        function setupTeamsByLeague() {
+            const teamsByLeague = {
+                'Argentina Liga Argentina': [
+                    'River Plate', 'Boca Juniors', 'Racing Club', 'Independiente',
+                    'San Lorenzo', 'Estudiantes', 'Vélez Sársfield', 'Huracán',
+                    'Lanús', 'Argentinos Juniors', 'Newells Old Boys', 'Rosario Central'
+                ],
+                'Premier League': [
+                    'Manchester City', 'Liverpool', 'Arsenal', 'Chelsea',
+                    'Manchester United', 'Tottenham', 'Newcastle', 'Brighton',
+                    'West Ham', 'Aston Villa', 'Crystal Palace', 'Brentford'
+                ],
+                'La Liga': [
+                    'Real Madrid', 'Barcelona', 'Atlético Madrid', 'Sevilla',
+                    'Real Sociedad', 'Real Betis', 'Villarreal', 'Valencia',
+                    'Athletic Bilbao', 'Getafe', 'Osasuna', 'Las Palmas'
+                ],
+                'Bundesliga': [
+                    'Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Bayer Leverkusen',
+                    'Eintracht Frankfurt', 'Wolfsburg', 'Freiburg', 'Union Berlin'
+                ],
+                'Serie A': [
+                    'Juventus', 'Inter Milan', 'AC Milan', 'Napoli',
+                    'Roma', 'Lazio', 'Atalanta', 'Fiorentina'
+                ],
+                'Ligue 1': [
+                    'Paris Saint-Germain', 'Marseille', 'Lyon', 'Monaco',
+                    'Nice', 'Rennes', 'Lille', 'Lens'
+                ]
+            };
+
+            window.teamsByLeague = teamsByLeague;
+        }
+
+        function updateTeamOptions() {
+            const league = document.getElementById('league-select').value;
+            const homeTeamSelect = document.getElementById('home-team-select');
+            const awayTeamSelect = document.getElementById('away-team-select');
+            
+            // Limpiar opciones
+            homeTeamSelect.innerHTML = '<option value="">Selecciona equipo local</option>';
+            awayTeamSelect.innerHTML = '<option value="">Selecciona equipo visitante</option>';
+            
+            if (league && window.teamsByLeague[league]) {
+                const teams = window.teamsByLeague[league];
+                teams.forEach(team => {
+                    homeTeamSelect.innerHTML += `<option value="${team}">${team}</option>`;
+                    awayTeamSelect.innerHTML += `<option value="${team}">${team}</option>`;
+                });
+            }
+        }
+
+        async function handlePrediction(e) {
+            e.preventDefault();
+            
+            const homeTeam = document.getElementById('home-team-select').value;
+            const awayTeam = document.getElementById('away-team-select').value;
+            const league = document.getElementById('league-select').value;
+            const date = document.getElementById('date-input').value;
+            
+            if (!homeTeam || !awayTeam || homeTeam === awayTeam) {
+                alert('Por favor selecciona equipos válidos y diferentes');
+                return;
+            }
+            
+            // Mostrar loading
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analizando...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Realizar predicción
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({homeTeam, awayTeam, league, date})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPredictionResults(data.data, homeTeam, awayTeam, league, date);
+                } else {
+                    throw new Error(data.message || 'Error en la predicción');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al generar la predicción: ' + error.message);
+            } finally {
+                // Restaurar botón
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function displayPredictionResults(data, homeTeam, awayTeam, league, date) {
+            // Actualizar información del partido
+            document.getElementById('home-team-name').textContent = homeTeam;
+            document.getElementById('away-team-name').textContent = awayTeam;
+            document.getElementById('match-date-display').textContent = new Date(date).toLocaleDateString();
+            document.getElementById('league-display').textContent = league;
+            
+            // Actualizar probabilidades
+            const homeProb = Math.round((data.victoria_local || data.homeWinProbability || 0) * 100);
+            const drawProb = Math.round((data.empate || data.drawProbability || 0) * 100);
+            const awayProb = Math.round((data.victoria_visitante || data.awayWinProbability || 0) * 100);
+            
+            document.getElementById('home-probability').textContent = homeProb + '%';
+            document.getElementById('draw-probability').textContent = drawProb + '%';
+            document.getElementById('away-probability').textContent = awayProb + '%';
+            
+            // Actualizar análisis BTTS
+            const bttsProb = Math.round((data.mercados_adicionales?.ambos_equipos_marcan || 0.5) * 100);
+            document.getElementById('btts-analysis').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-success">${bttsProb}%</h5>
+                                <p class="mb-0">Ambos marcan SÍ</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-12 d-flex justify-content-end">
-                        <button type="button" id="reset-btn" class="btn btn-outline-secondary me-2">
-                            <i class="fas fa-redo me-1"></i> Reiniciar
-                        </button>
-                        <button type="submit" id="analyze-btn" class="btn btn-primary btn-lg">
-                            <i class="fas fa-chart-line me-1"></i> Generar Predicción
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contenedor de resultados -->
-    <div id="prediction-container" class="container my-5 d-none">
-        <!-- Información del partido -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Partido</h4>
-            </div>
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-5 text-center">
-                        <h3 id="home-team-name" class="mb-3">Equipo Local</h3>
-                    </div>
-                    <div class="col-md-2 text-center my-3 my-md-0">
-                        <span class="vs-badge">VS</span>
-                    </div>
-                    <div class="col-md-5 text-center">
-                        <h3 id="away-team-name" class="mb-3">Equipo Visitante</h3>
+                    <div class="col-md-6">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-danger">${100 - bttsProb}%</h5>
+                                <p class="mb-0">Ambos marcan NO</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr>
-                <div class="row text-center">
-                    <div class="col-md-4">
-                        <i class="far fa-calendar-alt text-primary me-2"></i>
-                        <span id="match-date">Fecha</span>
-                    </div>
-                    <div class="col-md-4">
-                        <i class="fas fa-trophy text-primary me-2"></i>
-                        <span id="league-name">Liga</span>
-                    </div>
-                    <div class="col-md-4">
-                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                        <span id="match-venue">Estadio</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mejor apuesta recomendada -->
-        <div id="best-bet-container" class="mb-4"></div>
-
-        <!-- Navegación de mercados -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header">
-                <div class="d-flex flex-wrap justify-content-center" id="market-tabs">
-                    <span class="market-tab active" data-market="1x2">
-                        <i class="fas fa-poll me-1"></i> Resultado
-                    </span>
-                    <span class="market-tab" data-market="btts">
-                        <i class="fas fa-futbol me-1"></i> BTTS
-                    </span>
-                    <span class="market-tab" data-market="over-under">
-                        <i class="fas fa-chart-line me-1"></i> Goles
-                    </span>
-                    <span class="market-tab" data-market="corners">
-                        <i class="fas fa-flag me-1"></i> Córners
-                    </span>
-                    <span class="market-tab" data-market="cards">
-                        <i class="fas fa-square me-1"></i> Tarjetas
-                    </span>
-                    <span class="market-tab" data-market="handicap">
-                        <i class="fas fa-balance-scale me-1"></i> Hándicap
-                    </span>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Mercado 1X2 -->
-                <div id="market-1x2" class="market-content active">
-                    <h5 class="card-title mb-4">Predicción de Resultado (1X2)</h5>
-                    <div id="result-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Mercado BTTS -->
-                <div id="market-btts" class="market-content">
-                    <h5 class="card-title mb-4">Ambos Equipos Marcan (BTTS)</h5>
-                    <div id="btts-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Mercado Over/Under -->
-                <div id="market-over-under" class="market-content">
-                    <h5 class="card-title mb-4">Goles Totales (Over/Under)</h5>
-                    <div id="over-under-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Mercado Córners -->
-                <div id="market-corners" class="market-content">
-                    <h5 class="card-title mb-4">Predicción de Córners</h5>
-                    <div id="corners-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Mercado Tarjetas -->
-                <div id="market-cards" class="market-content">
-                    <h5 class="card-title mb-4">Predicción de Tarjetas</h5>
-                    <div id="cards-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Mercado Hándicap -->
-                <div id="market-handicap" class="market-content">
-                    <h5 class="card-title mb-4">Hándicap Asiático</h5>
-                    <div id="handicap-predictions">
-                        <!-- Se llena dinámicamente -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Información del modelo -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Información del Modelo IA</h5>
-            </div>
-            <div class="card-body">
+            `;
+            
+            // Actualizar análisis de goles
+            const overProb = Math.round((data.mercados_adicionales?.mas_2_5_goles || 0.5) * 100);
+            document.getElementById('goals-analysis').innerHTML = `
                 <div class="row">
-                    <div class="col-md-4">
-                        <strong>Tipo:</strong> <span id="model-type">Machine Learning</span>
+                    <div class="col-md-6">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-primary">${overProb}%</h5>
+                                <p class="mb-0">Más de 2.5 goles</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <strong>Precisión:</strong> <span id="model-accuracy">68%</span>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Confianza:</strong> <span id="model-confidence">⭐⭐⭐⭐</span>
+                    <div class="col-md-6">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="text-secondary">${100 - overProb}%</h5>
+                                <p class="mb-0">Menos de 2.5 goles</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            `;
+            
+            // Mostrar sección de resultados
+            document.getElementById('prediction-results').style.display = 'block';
+            document.getElementById('prediction-results').scrollIntoView({behavior: 'smooth'});
+        }
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-futbol me-2"></i>Predictor de Fútbol Premium</h5>
-                    <p class="small">Predicciones inteligentes con tecnología de vanguardia</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p class="small mb-0">
-                        <i class="fas fa-code me-1"></i> Powered by Machine Learning & Node.js<br>
-                        <span class="ai-badge mt-2">
-                            <i class="fas fa-brain"></i>
-                            API Status: <span id="api-status-footer">Online</span>
-                        </span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
+        async function checkServicesStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                const statusIndicator = document.getElementById('status-indicator');
+                if (data.status === 'ok') {
+                    statusIndicator.className = 'status-indicator status-online';
+                    statusIndicator.innerHTML = '<i class="fas fa-wifi me-2"></i>IA Online';
+                } else {
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusIndicator.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Modo Offline';
+                }
+            } catch (error) {
+                const statusIndicator = document.getElementById('status-indicator');
+                statusIndicator.className = 'status-indicator status-offline';
+                statusIndicator.innerHTML = '<i class="fas fa-times me-2"></i>Sin Conexión';
+            }
+        }
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Main JavaScript -->
-    <script src="js/main.js"></script>
+        // Verificar estado cada 30 segundos
+        setInterval(checkServicesStatus, 30000);
+    </script>
 </body>
 </html>

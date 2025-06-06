@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Valor - Cuotas vs IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .odds-input {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .value-analysis {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .value-positive {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left: 4px solid #28a745;
+        }
+        .value-negative {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left: 4px solid #dc3545;
+        }
+        .value-neutral {
+            background: linear-gradient(135deg, #fff3cd 0%, #fdeaa7 100%);
+            border-left: 4px solid #ffc107;
+        }
+        .ai-vs-bookmaker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .probability-comparison {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .opportunity-alert {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .bookmaker-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="fas fa-chart-line me-2"></i>Análisis de Valor: IA vs Casa de Apuestas</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input de Cuotas -->
+        <div class="odds-input">
+            <h5><i class="fas fa-calculator me-2"></i>Ingresa las Cuotas de tu Casa de Apuestas</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">🏠 Gana Local</label>
+                    <div class="input-group">
+                        <input type="number" id="odds-home" class="form-control" placeholder="2.10" step="0.01" min="1.01">
+                        <span class="input-group-text">x</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">🤝 Empate</label>
+                    <div class="input-group">
+                        <input type="number" id="odds-draw" class="form-control" placeholder="3.40" step="0.01" min="1.01">
+                        <span class="input-group-text">x</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">✈️ Gana Visitante</label>
+                    <div class="input-group">
+                        <input type="number" id="odds-away" class="form-control" placeholder="4.20" step="0.01" min="1.01">
+                        <span class="input-group-text">x</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">⚽ Ambos Marcan (Sí)</label>
+                    <div class="input-group">
+                        <input type="number" id="odds-btts-yes" class="form-control" placeholder="1.75" step="0.01" min="1.01">
+                        <span class="input-group-text">x</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">📈 Más de 2.5 Goles</label>
+                    <div class="input-group">
+                        <input type="number" id="odds-over25" class="form-control" placeholder="1.90" step="0.01" min="1.01">
+                        <span class="input-group-text">x</span>
+                    </div>
+                </div>
+                <div class="col-12 text-center">
+                    <button class="btn btn-primary btn-lg" onclick="analyzeValue()">
+                        <i class="fas fa-brain me-2"></i>Analizar Valor con IA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados del Análisis -->
+        <div id="value-results" style="display: none;">
+            <!-- Alerta de Oportunidad -->
+            <div id="opportunity-alert" class="opportunity-alert mb-4" style="display: none;">
+                <h4><i class="fas fa-fire me-2"></i>¡OPORTUNIDAD DE VALOR DETECTADA!</h4>
+                <p class="mb-0">La IA ha encontrado una discrepancia significativa con las cuotas</p>
+            </div>
+
+            <!-- Análisis por Mercado -->
+            <div class="row g-4">
+                <!-- 1X2 Analysis -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-trophy me-2"></i>Resultado 1X2</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="analysis-1x2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BTTS Analysis -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6><i class="fas fa-futbol me-2"></i>Ambos Marcan</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="analysis-btts"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Over/Under Analysis -->
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h6><i class="fas fa-chart-bar me-2"></i>Over 2.5 Goles</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="analysis-over25"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Ejecutivo -->
+            <div class="card mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-brain me-2"></i>Recomendación de la IA</h5>
+                </div>
+                <div class="card-body">
+                    <div id="ai-recommendation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos simulados de IA (en producción vendrían del backend)
+        const aiPrediction = {
+            homeWin: 0.65,
+            draw: 0.22,
+            awayWin: 0.13,
+            bttsYes: 0.72,
+            over25: 0.68
+        };
+
+        function analyzeValue() {
+            // Obtener cuotas ingresadas
+            const odds = {
+                home: parseFloat(document.getElementById('odds-home').value) || 2.10,
+                draw: parseFloat(document.getElementById('odds-draw').value) || 3.40,
+                away: parseFloat(document.getElementById('odds-away').value) || 4.20,
+                bttsYes: parseFloat(document.getElementById('odds-btts-yes').value) || 1.75,
+                over25: parseFloat(document.getElementById('odds-over25').value) || 1.90
+            };
+
+            // Calcular probabilidades implícitas de las cuotas
+            const impliedProb = {
+                home: 1 / odds.home,
+                draw: 1 / odds.draw,
+                away: 1 / odds.away,
+                bttsYes: 1 / odds.bttsYes,
+                over25: 1 / odds.over25
+            };
+
+            // Calcular valor esperado y edge
+            const analysis = {
+                home: calculateValue(aiPrediction.homeWin, odds.home, impliedProb.home),
+                draw: calculateValue(aiPrediction.draw, odds.draw, impliedProb.draw),
+                away: calculateValue(aiPrediction.awayWin, odds.away, impliedProb.away),
+                bttsYes: calculateValue(aiPrediction.bttsYes, odds.bttsYes, impliedProb.bttsYes),
+                over25: calculateValue(aiPrediction.over25, odds.over25, impliedProb.over25)
+            };
+
+            // Mostrar resultados
+            displayResults(analysis, odds);
+        }
+
+        function calculateValue(aiProb, odds, impliedProb) {
+            const expectedValue = (aiProb * odds) - 1;
+            const edge = aiProb - impliedProb;
+            const edgePercentage = (edge / impliedProb) * 100;
+            
+            return {
+                aiProb: aiProb,
+                impliedProb: impliedProb,
+                expectedValue: expectedValue,
+                edge: edge,
+                edgePercentage: edgePercentage,
+                hasValue: edge > 0.05,
+                recommendation: edge > 0.05 ? 'APOSTAR' : edge > 0.02 ? 'VALOR LEVE' : 'PASAR'
+            };
+        }
+
+        function displayResults(analysis, odds) {
+            document.getElementById('value-results').style.display = 'block';
+            
+            // Detectar si hay oportunidades
+            const hasOpportunity = Object.values(analysis).some(a => a.hasValue);
+            document.getElementById('opportunity-alert').style.display = hasOpportunity ? 'block' : 'none';
+
+            // Mostrar análisis 1X2
+            const best1x2 = getBest1x2(analysis);
+            document.getElementById('analysis-1x2').innerHTML = createAnalysisCard(best1x2, odds[best1x2.market]);
+
+            // Mostrar análisis BTTS
+            document.getElementById('analysis-btts').innerHTML = createAnalysisCard(analysis.bttsYes, odds.bttsYes, 'Ambos Marcan SÍ');
+
+            // Mostrar análisis Over 2.5
+            document.getElementById('analysis-over25').innerHTML = createAnalysisCard(analysis.over25, odds.over25, 'Más de 2.5 Goles');
+
+            // Recomendación general
+            document.getElementById('ai-recommendation').innerHTML = createRecommendation(analysis);
+        }
+
+        function getBest1x2(analysis) {
+            const options = [
+                { market: 'home', data: analysis.home, name: 'Victoria Local' },
+                { market: 'draw', data: analysis.draw, name: 'Empate' },
+                { market: 'away', data: analysis.away, name: 'Victoria Visitante' }
+            ];
+            
+            return options.reduce((best, current) => 
+                current.data.expectedValue > best.data.expectedValue ? current : best
+            );
+        }
+
+        function createAnalysisCard(analysis, odds, name = '') {
+            const valueClass = analysis.hasValue ? 'value-positive' : 
+                             analysis.expectedValue > -0.05 ? 'value-neutral' : 'value-negative';
+            
+            return `
+                <div class="value-analysis ${valueClass}">
+                    <div class="ai-vs-bookmaker">
+                        <div class="probability-comparison">
+                            <strong>🤖 IA:</strong> ${(analysis.aiProb * 100).toFixed(1)}%
+                        </div>
+                        <div class="probability-comparison">
+                            <strong>🏢 Casa:</strong> ${(analysis.impliedProb * 100).toFixed(1)}%
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <small class="text-muted">Valor Esperado</small><br>
+                            <strong class="${analysis.expectedValue > 0 ? 'text-success' : 'text-danger'}">
+                                ${(analysis.expectedValue * 100).toFixed(1)}%
+                            </strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Edge</small><br>
+                            <strong class="${analysis.edge > 0 ? 'text-success' : 'text-danger'}">
+                                ${analysis.edgePercentage.toFixed(1)}%
+                            </strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Recomendación</small><br>
+                            <span class="badge ${analysis.recommendation === 'APOSTAR' ? 'bg-success' : 
+                                              analysis.recommendation === 'VALOR LEVE' ? 'bg-warning' : 'bg-secondary'}">
+                                ${analysis.recommendation}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRecommendation(analysis) {
+            const opportunities = Object.entries(analysis).filter(([key, data]) => data.hasValue);
+            
+            if (opportunities.length === 0) {
+                return `
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>No se detectaron oportunidades de valor</h6>
+                        <p class="mb-0">Las cuotas de la casa están alineadas con las predicciones de la IA. 
+                        Considera esperar mejores cuotas o buscar otros partidos.</p>
+                    </div>
+                `;
+            }
+
+            const bestOpportunity = opportunities.reduce((best, current) => 
+                current[1].expectedValue > best[1].expectedValue ? current : best
+            );
+
+            const marketNames = {
+                home: 'Victoria Local',
+                draw: 'Empate', 
+                away: 'Victoria Visitante',
+                bttsYes: 'Ambos Marcan SÍ',
+                over25: 'Más de 2.5 Goles'
+            };
+
+            return `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-star me-2"></i>Mejor Oportunidad Detectada</h6>
+                    <p><strong>${marketNames[bestOpportunity[0]]}</strong></p>
+                    <p>La IA calcula un ${(bestOpportunity[1].aiProb * 100).toFixed(1)}% de probabilidad, 
+                    mientras que la casa implica solo ${(bestOpportunity[1].impliedProb * 100).toFixed(1)}%.</p>
+                    <p class="mb-0"><strong>Valor esperado: +${(bestOpportunity[1].expectedValue * 100).toFixed(1)}%</strong></p>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Recuerda</h6>
+                    <ul class="mb-0">
+                        <li>Estas son predicciones basadas en IA, no garantías</li>
+                        <li>Apuesta solo lo que puedas permitirte perder</li>
+                        <li>El análisis de valor requiere una muestra grande para ser efectivo</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Auto-llenar con valores de ejemplo
+        setTimeout(() => {
+            document.getElementById('odds-home').value = '2.10';
+            document.getElementById('odds-draw').value = '3.40';
+            document.getElementById('odds-away').value = '4.20';
+            document.getElementById('odds-btts-yes').value = '1.75';
+            document.getElementById('odds-over25').value = '1.90';
+        }, 1000);
+    </script>
+</body>
+</html>

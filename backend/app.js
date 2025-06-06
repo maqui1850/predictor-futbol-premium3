@@ -17,7 +17,15 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Busca donde están las otras rutas (cerca de línea 20-30)
+// Agrega DESPUÉS de las otras rutas:
 
+const valueAnalysisRoutes = require('./routes/valueAnalysisRoutes');
+
+// Luego busca donde se usan las rutas (app.use)
+// Agrega:
+
+app.use('/api/value', valueAnalysisRoutes);
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname, '../frontend')));
 
