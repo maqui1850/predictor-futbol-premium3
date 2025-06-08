@@ -3,782 +3,847 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predictor de Fútbol Premium - IA Avanzada</title>
-    
-    <!-- Bootstrap 5.3 -->
+    <title>Predictor de Fútbol Premium Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
         }
-        
+
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .hero-section {
-            background: linear-gradient(135deg, 
-                rgba(102, 126, 234, 0.9) 0%, 
-                rgba(118, 75, 162, 0.9) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            padding: 80px 0;
-            text-align: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: float 20s infinite linear;
-        }
-        
-        @keyframes float {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.3rem;
-            font-weight: 400;
-            opacity: 0.9;
-            margin-bottom: 2rem;
-        }
-        
-        .feature-badges {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-        
-        .feature-badge {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(44, 62, 80, 0.95) !important;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .feature-badge:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+
+        .main-container {
+            margin-top: 30px;
+            margin-bottom: 50px;
         }
-        
+
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: 20px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
-        }
-        
-        .form-control, .form-select {
-            border-radius: 12px;
-            border: 2px solid #e9ecef;
-            padding: 12px 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            background: rgba(255, 255, 255, 1);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-        }
-        
-        .status-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-weight: 500;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .status-online {
-            background: rgba(40, 167, 69, 0.9);
-            color: white;
-        }
-        
-        .status-offline {
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-        }
-        
-        .ai-info-card {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            border-radius: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .league-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .league-card {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-align: center;
+            background: white;
+        }
+
+        .league-card:hover {
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .league-card.selected {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .team-autocomplete {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .autocomplete-item:hover {
+            background: #f8f9fa;
+        }
+
+        .odds-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .bookmaker-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .bookmaker-card.best-odds {
+            border-color: var(--success-color);
+            background: #d4edda;
+        }
+
+        .value-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .value-positive {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .value-negative {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .arbitrage-alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
             margin: 20px 0;
         }
-        
-        .ai-stats {
-            display: flex;
-            justify-content: space-around;
+
+        .form-indicator {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            margin: 0 2px;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .form-w { background: var(--success-color); }
+        .form-d { background: var(--warning-color); }
+        .form-l { background: var(--danger-color); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
             margin-top: 20px;
         }
-        
-        .ai-stat {
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
             text-align: center;
         }
-        
-        .ai-stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            display: block;
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
         }
-        
-        .ai-stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        .prediction-result {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 30px 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-        
-        .match-header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .team-vs {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            margin: 15px 0;
-        }
-        
-        .team-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .vs-badge {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .probability-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            margin: 10px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .probability-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .probability-percentage {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-        
-        .tab-content {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 20px;
-        }
-        
-        .nav-tabs .nav-link {
-            border-radius: 10px 10px 0 0;
-            border: none;
+
+        .stat-label {
+            font-size: 0.9em;
             color: #6c757d;
-            font-weight: 500;
-            padding: 12px 20px;
-            margin-right: 5px;
-            transition: all 0.3s ease;
         }
-        
-        .nav-tabs .nav-link.active {
+
+        .recommendation-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
         }
-        
-        .floating-elements {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
         }
-        
-        .floating-icon {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.1);
-            animation: float-icon 15s infinite linear;
+
+        .tab-content {
+            animation: fadeIn 0.5s ease-in;
         }
-        
-        @keyframes float-icon {
-            0% { transform: translateY(100vh) rotate(0deg); }
-            100% { transform: translateY(-100px) rotate(360deg); }
-        }
-        
-        .floating-icon:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .floating-icon:nth-child(2) { left: 20%; animation-delay: 2s; }
-        .floating-icon:nth-child(3) { left: 30%; animation-delay: 4s; }
-        .floating-icon:nth-child(4) { left: 40%; animation-delay: 6s; }
-        .floating-icon:nth-child(5) { left: 50%; animation-delay: 8s; }
-        .floating-icon:nth-child(6) { left: 60%; animation-delay: 10s; }
-        .floating-icon:nth-child(7) { left: 70%; animation-delay: 12s; }
-        .floating-icon:nth-child(8) { left: 80%; animation-delay: 14s; }
-        .floating-icon:nth-child(9) { left: 90%; animation-delay: 16s; }
-        
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .feature-badges {
-                justify-content: center;
-            }
-            
-            .glass-card {
-                margin: 10px;
-                padding: 20px;
-            }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <!-- Elementos flotantes de fondo -->
-    <div class="floating-elements">
-        <i class="fas fa-futbol floating-icon" style="font-size: 30px;"></i>
-        <i class="fas fa-chart-line floating-icon" style="font-size: 25px;"></i>
-        <i class="fas fa-brain floating-icon" style="font-size: 28px;"></i>
-        <i class="fas fa-trophy floating-icon" style="font-size: 32px;"></i>
-        <i class="fas fa-target floating-icon" style="font-size: 26px;"></i>
-        <i class="fas fa-bolt floating-icon" style="font-size: 24px;"></i>
-        <i class="fas fa-star floating-icon" style="font-size: 27px;"></i>
-        <i class="fas fa-fire floating-icon" style="font-size: 29px;"></i>
-        <i class="fas fa-gem floating-icon" style="font-size: 31px;"></i>
-    </div>
-
-    <!-- Status Indicator -->
-    <div id="status-indicator" class="status-indicator status-online">
-        <i class="fas fa-wifi me-2"></i>IA Online
-    </div>
-
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-futbol me-2"></i>
-                Predictor Premium
+                Predictor de Fútbol Premium Pro
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#predictor">Predictor</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#value-analyzer">Análisis de Valor</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#statistics">Estadísticas</a>
-                    </li>
-                </ul>
+            <div class="ms-auto">
+                <span class="badge bg-success me-2">🤖 IA Activa</span>
+                <span class="badge bg-info me-2">🌐 Web Stats</span>
+                <span class="badge bg-warning">💰 Cuotas Live</span>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <div class="container">
-                <h1 class="hero-title">Predictor de Fútbol Premium</h1>
-                <p class="hero-subtitle">
-                    Inteligencia Artificial avanzada para predicciones de fútbol profesionales
-                </p>
-                
-                <div class="feature-badges">
-                    <span class="feature-badge">
-                        <i class="fas fa-brain me-2"></i>Machine Learning
-                    </span>
-                    <span class="feature-badge">
-                        <i class="fas fa-chart-line me-2"></i>68% Precisión
-                    </span>
-                    <span class="feature-badge">
-                        <i class="fas fa-bolt me-2"></i>6 Mercados
-                    </span>
-                    <span class="feature-badge">
-                        <i class="fas fa-shield-alt me-2"></i>Análisis de Valor
-                    </span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Content -->
-    <div class="container" style="margin-top: -50px; position: relative; z-index: 10;">
-        
-        <!-- AI Info Card -->
-        <div class="ai-info-card">
-            <h4><i class="fas fa-robot me-2"></i>Modelo de Inteligencia Artificial</h4>
-            <p>Gradient Boosting entrenado con miles de partidos históricos</p>
-            <div class="ai-stats">
-                <div class="ai-stat">
-                    <span class="ai-stat-number">68%</span>
-                    <span class="ai-stat-label">Precisión</span>
-                </div>
-                <div class="ai-stat">
-                    <span class="ai-stat-number">6</span>
-                    <span class="ai-stat-label">Mercados</span>
-                </div>
-                <div class="ai-stat">
-                    <span class="ai-stat-number">30+</span>
-                    <span class="ai-stat-label">Features</span>
-                </div>
-                <div class="ai-stat">
-                    <span class="ai-stat-number">Real-time</span>
-                    <span class="ai-stat-label">Análisis</span>
-                </div>
+    <div class="container main-container">
+        <!-- Selector de Liga -->
+        <div class="glass-card">
+            <h4 class="mb-3"><i class="fas fa-trophy me-2"></i>Selecciona una Liga</h4>
+            <div class="league-selector" id="leagueSelector">
+                <!-- Se llenará dinámicamente -->
             </div>
         </div>
 
-        <!-- Predictor Form -->
-        <div id="predictor" class="glass-card">
-            <h3 class="text-center mb-4">
-                <i class="fas fa-search me-2"></i>Analizar Partido
-            </h3>
-            
-            <form id="prediction-form">
+        <!-- Formulario de Predicción -->
+        <div class="glass-card">
+            <h4 class="mb-3"><i class="fas fa-search me-2"></i>Analizar Partido</h4>
+            <form id="predictionForm">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Liga</label>
-                        <select id="league-select" class="form-select" required>
-                            <option value="">Selecciona una liga</option>
-                            <option value="Argentina Liga Argentina">🇦🇷 Liga Argentina</option>
-                            <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
-                            <option value="La Liga">🇪🇸 La Liga</option>
-                            <option value="Bundesliga">🇩🇪 Bundesliga</option>
-                            <option value="Serie A">🇮🇹 Serie A</option>
-                            <option value="Ligue 1">🇫🇷 Ligue 1</option>
-                        </select>
+                        <label class="form-label">Equipo Local</label>
+                        <div class="team-autocomplete">
+                            <input type="text" id="homeTeam" class="form-control" placeholder="Escribe para buscar..." required>
+                            <div class="autocomplete-suggestions" id="homeTeamSuggestions"></div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Fecha</label>
-                        <input type="date" id="date-input" class="form-control" required>
+                        <label class="form-label">Equipo Visitante</label>
+                        <div class="team-autocomplete">
+                            <input type="text" id="awayTeam" class="form-control" placeholder="Escribe para buscar..." required>
+                            <div class="autocomplete-suggestions" id="awayTeamSuggestions"></div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Equipo Local</label>
-                        <select id="home-team-select" class="form-select" required>
-                            <option value="">Selecciona equipo local</option>
-                        </select>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="includeWebStats" checked>
+                            <label class="form-check-label" for="includeWebStats">
+                                Incluir estadísticas web (SofaScore, Flashscore)
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="includeOdds" checked>
+                            <label class="form-check-label" for="includeOdds">
+                                Comparar cuotas de casas de apuestas
+                            </label>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Equipo Visitante</label>
-                        <select id="away-team-select" class="form-select" required>
-                            <option value="">Selecciona equipo visitante</option>
-                        </select>
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-chart-line me-2"></i>Análisis Completo
+                        </button>
                     </div>
-                </div>
-                
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-brain me-2"></i>Generar Predicción IA
-                    </button>
                 </div>
             </form>
         </div>
 
-        <!-- Prediction Results -->
-        <div id="prediction-results" class="prediction-result" style="display: none;">
-            <!-- Match Header -->
-            <div class="match-header">
-                <div class="team-vs">
-                    <span id="home-team-name" class="team-name">Equipo Local</span>
-                    <span class="vs-badge">VS</span>
-                    <span id="away-team-name" class="team-name">Equipo Visitante</span>
-                </div>
-                <p class="text-muted mb-0">
-                    <i class="fas fa-calendar me-2"></i><span id="match-date-display"></span>
-                    <i class="fas fa-trophy ms-3 me-2"></i><span id="league-display"></span>
-                </p>
+        <!-- Loading -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
             </div>
+            <p class="mt-3">Analizando datos desde múltiples fuentes...</p>
+        </div>
 
-            <!-- Probability Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="probability-card">
-                        <h6><i class="fas fa-home me-2"></i>Victoria Local</h6>
-                        <div id="home-probability" class="probability-percentage">0%</div>
-                        <small>Probabilidad de victoria</small>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="probability-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                        <h6><i class="fas fa-handshake me-2"></i>Empate</h6>
-                        <div id="draw-probability" class="probability-percentage">0%</div>
-                        <small>Probabilidad de empate</small>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="probability-card" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">
-                        <h6><i class="fas fa-plane me-2"></i>Victoria Visitante</h6>
-                        <div id="away-probability" class="probability-percentage">0%</div>
-                        <small>Probabilidad de victoria</small>
-                    </div>
+        <!-- Resultados -->
+        <div id="resultsSection" style="display: none;">
+            <!-- Información del Partido -->
+            <div class="glass-card">
+                <div class="text-center">
+                    <h3>
+                        <span id="resultHomeTeam"></span> 
+                        <span class="mx-3">VS</span> 
+                        <span id="resultAwayTeam"></span>
+                    </h3>
+                    <p class="text-muted mb-0"><span id="resultLeague"></span></p>
                 </div>
             </div>
 
-            <!-- Tabs for Different Markets -->
-            <ul class="nav nav-tabs" id="marketTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="btts-tab" data-bs-toggle="tab" data-bs-target="#btts" type="button" role="tab">
-                        <i class="fas fa-futbol me-2"></i>BTTS
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab">
-                        <i class="fas fa-chart-bar me-2"></i>Goles
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="value-tab" data-bs-toggle="tab" data-bs-target="#value" type="button" role="tab">
-                        <i class="fas fa-calculator me-2"></i>Valor
-                    </button>
-                </li>
-            </ul>
+            <!-- Tabs de Análisis -->
+            <div class="glass-card">
+                <ul class="nav nav-pills nav-fill mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#predictionTab">
+                            <i class="fas fa-brain me-2"></i>Predicción IA
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#oddsTab">
+                            <i class="fas fa-dollar-sign me-2"></i>Cuotas
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#statsTab">
+                            <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#valueTab">
+                            <i class="fas fa-gem me-2"></i>Análisis Valor
+                        </button>
+                    </li>
+                </ul>
 
-            <div class="tab-content" id="marketTabContent">
-                <div class="tab-pane fade show active" id="btts" role="tabpanel">
-                    <h5><i class="fas fa-futbol me-2"></i>Ambos Equipos Marcan</h5>
-                    <div id="btts-analysis"></div>
-                </div>
-                <div class="tab-pane fade" id="goals" role="tabpanel">
-                    <h5><i class="fas fa-chart-bar me-2"></i>Análisis de Goles</h5>
-                    <div id="goals-analysis"></div>
-                </div>
-                <div class="tab-pane fade" id="value" role="tabpanel">
-                    <h5><i class="fas fa-calculator me-2"></i>Análisis de Valor</h5>
-                    <div id="value-analysis">
-                        <p class="text-muted">Ingresa las cuotas de tu casa de apuestas para analizar el valor:</p>
-                        <!-- Se llenará dinámicamente -->
+                <div class="tab-content">
+                    <!-- Tab Predicción -->
+                    <div class="tab-pane fade show active" id="predictionTab">
+                        <div id="predictionContent">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
                     </div>
+
+                    <!-- Tab Cuotas -->
+                    <div class="tab-pane fade" id="oddsTab">
+                        <div id="oddsContent">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Tab Estadísticas -->
+                    <div class="tab-pane fade" id="statsTab">
+                        <div id="statsContent">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Tab Análisis de Valor -->
+                    <div class="tab-pane fade" id="valueTab">
+                        <div id="valueContent">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendaciones -->
+            <div class="glass-card" id="recommendationsSection">
+                <h4 class="mb-3"><i class="fas fa-lightbulb me-2"></i>Recomendaciones</h4>
+                <div id="recommendationsContent">
+                    <!-- Se llenará dinámicamente -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuración inicial
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
+        // Variables globales
+        let selectedLeague = '';
+        let leaguesData = {};
+        let currentTeams = [];
 
-        function initializeApp() {
-            // Configurar fecha de hoy
-            document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
-            
-            // Configurar equipos por liga
-            setupTeamsByLeague();
-            
-            // Event listeners
-            document.getElementById('league-select').addEventListener('change', updateTeamOptions);
-            document.getElementById('prediction-form').addEventListener('submit', handlePrediction);
-            
-            // Verificar estado de servicios
-            checkServicesStatus();
-        }
-
-        function setupTeamsByLeague() {
-            const teamsByLeague = {
-                'Argentina Liga Argentina': [
-                    'River Plate', 'Boca Juniors', 'Racing Club', 'Independiente',
-                    'San Lorenzo', 'Estudiantes', 'Vélez Sársfield', 'Huracán',
-                    'Lanús', 'Argentinos Juniors', 'Newells Old Boys', 'Rosario Central'
-                ],
-                'Premier League': [
-                    'Manchester City', 'Liverpool', 'Arsenal', 'Chelsea',
-                    'Manchester United', 'Tottenham', 'Newcastle', 'Brighton',
-                    'West Ham', 'Aston Villa', 'Crystal Palace', 'Brentford'
-                ],
-                'La Liga': [
-                    'Real Madrid', 'Barcelona', 'Atlético Madrid', 'Sevilla',
-                    'Real Sociedad', 'Real Betis', 'Villarreal', 'Valencia',
-                    'Athletic Bilbao', 'Getafe', 'Osasuna', 'Las Palmas'
-                ],
-                'Bundesliga': [
-                    'Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Bayer Leverkusen',
-                    'Eintracht Frankfurt', 'Wolfsburg', 'Freiburg', 'Union Berlin'
-                ],
-                'Serie A': [
-                    'Juventus', 'Inter Milan', 'AC Milan', 'Napoli',
-                    'Roma', 'Lazio', 'Atalanta', 'Fiorentina'
-                ],
-                'Ligue 1': [
-                    'Paris Saint-Germain', 'Marseille', 'Lyon', 'Monaco',
-                    'Nice', 'Rennes', 'Lille', 'Lens'
-                ]
-            };
-
-            window.teamsByLeague = teamsByLeague;
-        }
-
-        function updateTeamOptions() {
-            const league = document.getElementById('league-select').value;
-            const homeTeamSelect = document.getElementById('home-team-select');
-            const awayTeamSelect = document.getElementById('away-team-select');
-            
-            // Limpiar opciones
-            homeTeamSelect.innerHTML = '<option value="">Selecciona equipo local</option>';
-            awayTeamSelect.innerHTML = '<option value="">Selecciona equipo visitante</option>';
-            
-            if (league && window.teamsByLeague[league]) {
-                const teams = window.teamsByLeague[league];
-                teams.forEach(team => {
-                    homeTeamSelect.innerHTML += `<option value="${team}">${team}</option>`;
-                    awayTeamSelect.innerHTML += `<option value="${team}">${team}</option>`;
-                });
+        // Cargar ligas al iniciar
+        async function loadLeagues() {
+            try {
+                const response = await fetch('/api/enhanced/leagues');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayLeagues(data.leagues);
+                    
+                    // Guardar datos de ligas
+                    data.leagues.forEach(league => {
+                        leaguesData[league.name] = league;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading leagues:', error);
             }
         }
 
-        async function handlePrediction(e) {
+        // Mostrar ligas
+        function displayLeagues(leagues) {
+            const container = document.getElementById('leagueSelector');
+            container.innerHTML = '';
+            
+            leagues.forEach(league => {
+                const card = document.createElement('div');
+                card.className = 'league-card';
+                card.innerHTML = `
+                    <div class="fs-2">${league.flag}</div>
+                    <div class="fw-bold">${league.name}</div>
+                    <small class="text-muted">${league.teamsCount} equipos</small>
+                `;
+                card.onclick = () => selectLeague(league.name);
+                container.appendChild(card);
+            });
+        }
+
+        // Seleccionar liga
+        async function selectLeague(leagueName) {
+            selectedLeague = leagueName;
+            
+            // Actualizar UI
+            document.querySelectorAll('.league-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.league-card').classList.add('selected');
+            
+            // Cargar equipos de la liga
+            try {
+                const response = await fetch(`/api/enhanced/leagues/${encodeURIComponent(leagueName)}/teams`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentTeams = data.teams;
+                    setupAutocomplete();
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+
+        // Configurar autocompletado
+        function setupAutocomplete() {
+            const homeInput = document.getElementById('homeTeam');
+            const awayInput = document.getElementById('awayTeam');
+            const homeSuggestions = document.getElementById('homeTeamSuggestions');
+            const awaySuggestions = document.getElementById('awayTeamSuggestions');
+            
+            setupAutocompleteInput(homeInput, homeSuggestions);
+            setupAutocompleteInput(awayInput, awaySuggestions);
+        }
+
+        function setupAutocompleteInput(input, suggestionsDiv) {
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                suggestionsDiv.innerHTML = '';
+                
+                if (value.length < 2) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+                
+                const matches = currentTeams.filter(team => 
+                    team.toLowerCase().includes(value)
+                );
+                
+                if (matches.length > 0) {
+                    suggestionsDiv.style.display = 'block';
+                    matches.slice(0, 5).forEach(team => {
+                        const item = document.createElement('div');
+                        item.className = 'autocomplete-item';
+                        item.innerHTML = `<i class="fas fa-shield-alt me-2"></i>${team}`;
+                        item.onclick = () => {
+                            input.value = team;
+                            suggestionsDiv.style.display = 'none';
+                        };
+                        suggestionsDiv.appendChild(item);
+                    });
+                } else {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+            
+            // Cerrar sugerencias al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target)) {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const homeTeam = document.getElementById('home-team-select').value;
-            const awayTeam = document.getElementById('away-team-select').value;
-            const league = document.getElementById('league-select').value;
-            const date = document.getElementById('date-input').value;
+            const homeTeam = document.getElementById('homeTeam').value;
+            const awayTeam = document.getElementById('awayTeam').value;
+            const includeWebStats = document.getElementById('includeWebStats').checked;
+            const includeOdds = document.getElementById('includeOdds').checked;
             
-            if (!homeTeam || !awayTeam || homeTeam === awayTeam) {
-                alert('Por favor selecciona equipos válidos y diferentes');
+            if (!selectedLeague) {
+                alert('Por favor selecciona una liga primero');
                 return;
             }
             
             // Mostrar loading
-            const submitBtn = document.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analizando...';
-            submitBtn.disabled = true;
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
             
             try {
-                // Realizar predicción
-                const response = await fetch('/api/predict', {
+                // Hacer análisis completo
+                const response = await fetch('/api/enhanced/predict/complete', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({homeTeam, awayTeam, league, date})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        homeTeam,
+                        awayTeam,
+                        league: selectedLeague
+                    })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayPredictionResults(data.data, homeTeam, awayTeam, league, date);
+                    displayResults(data);
                 } else {
-                    throw new Error(data.message || 'Error en la predicción');
+                    alert('Error al generar análisis');
                 }
-                
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al generar la predicción: ' + error.message);
+                alert('Error al conectar con el servidor');
             } finally {
-                // Restaurar botón
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+                document.getElementById('loadingSpinner').style.display = 'none';
             }
-        }
+        });
 
-        function displayPredictionResults(data, homeTeam, awayTeam, league, date) {
+        // Mostrar resultados
+        function displayResults(data) {
             // Actualizar información del partido
-            document.getElementById('home-team-name').textContent = homeTeam;
-            document.getElementById('away-team-name').textContent = awayTeam;
-            document.getElementById('match-date-display').textContent = new Date(date).toLocaleDateString();
-            document.getElementById('league-display').textContent = league;
+            document.getElementById('resultHomeTeam').textContent = data.match.homeTeam;
+            document.getElementById('resultAwayTeam').textContent = data.match.awayTeam;
+            document.getElementById('resultLeague').textContent = data.match.league;
             
-            // Actualizar probabilidades
-            const homeProb = Math.round((data.victoria_local || data.homeWinProbability || 0) * 100);
-            const drawProb = Math.round((data.empate || data.drawProbability || 0) * 100);
-            const awayProb = Math.round((data.victoria_visitante || data.awayWinProbability || 0) * 100);
+            // Mostrar predicciones
+            displayPrediction(data.prediction);
             
-            document.getElementById('home-probability').textContent = homeProb + '%';
-            document.getElementById('draw-probability').textContent = drawProb + '%';
-            document.getElementById('away-probability').textContent = awayProb + '%';
+            // Mostrar cuotas
+            if (data.odds) {
+                displayOdds(data.odds);
+            }
             
-            // Actualizar análisis BTTS
-            const bttsProb = Math.round((data.mercados_adicionales?.ambos_equipos_marcan || 0.5) * 100);
-            document.getElementById('btts-analysis').innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="text-success">${bttsProb}%</h5>
-                                <p class="mb-0">Ambos marcan SÍ</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="text-danger">${100 - bttsProb}%</h5>
-                                <p class="mb-0">Ambos marcan NO</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // Mostrar estadísticas
+            if (data.form) {
+                displayStats(data.form);
+            }
             
-            // Actualizar análisis de goles
-            const overProb = Math.round((data.mercados_adicionales?.mas_2_5_goles || 0.5) * 100);
-            document.getElementById('goals-analysis').innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="text-primary">${overProb}%</h5>
-                                <p class="mb-0">Más de 2.5 goles</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h5 class="text-secondary">${100 - overProb}%</h5>
-                                <p class="mb-0">Menos de 2.5 goles</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // Mostrar análisis de valor
+            if (data.valueAnalysis) {
+                displayValueAnalysis(data.valueAnalysis, data.odds);
+            }
+            
+            // Mostrar recomendaciones
+            if (data.recommendations) {
+                displayRecommendations(data.recommendations);
+            }
             
             // Mostrar sección de resultados
-            document.getElementById('prediction-results').style.display = 'block';
-            document.getElementById('prediction-results').scrollIntoView({behavior: 'smooth'});
+            document.getElementById('resultsSection').style.display = 'block';
         }
 
-        async function checkServicesStatus() {
-            try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
+        // Mostrar predicción
+        function displayPrediction(prediction) {
+            const content = document.getElementById('predictionContent');
+            
+            const homeProb = (prediction.victoria_local || prediction.homeWinProbability || 0) * 100;
+            const drawProb = (prediction.empate || prediction.drawProbability || 0) * 100;
+            const awayProb = (prediction.victoria_visitante || prediction.awayWinProbability || 0) * 100;
+            
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Victoria Local</div>
+                            <div class="stat-value">${homeProb.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Empate</div>
+                            <div class="stat-value">${drawProb.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Victoria Visitante</div>
+                            <div class="stat-value">${awayProb.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                </div>
                 
-                const statusIndicator = document.getElementById('status-indicator');
-                if (data.status === 'ok') {
-                    statusIndicator.className = 'status-indicator status-online';
-                    statusIndicator.innerHTML = '<i class="fas fa-wifi me-2"></i>IA Online';
-                } else {
-                    statusIndicator.className = 'status-indicator status-offline';
-                    statusIndicator.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Modo Offline';
-                }
-            } catch (error) {
-                const statusIndicator = document.getElementById('status-indicator');
-                statusIndicator.className = 'status-indicator status-offline';
-                statusIndicator.innerHTML = '<i class="fas fa-times me-2"></i>Sin Conexión';
-            }
+                <div class="mt-4">
+                    <h5>Análisis IA</h5>
+                    <p>${prediction.analisis?.general || 'Análisis basado en modelo de machine learning'}</p>
+                </div>
+                
+                ${prediction.enhancedAnalysis ? `
+                    <div class="mt-4">
+                        <h5>Insights Adicionales</h5>
+                        ${prediction.enhancedAnalysis.map(insight => `
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>${insight.insight}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
         }
 
-        // Verificar estado cada 30 segundos
-        setInterval(checkServicesStatus, 30000);
+        // Mostrar cuotas
+        function displayOdds(odds) {
+            const content = document.getElementById('oddsContent');
+            
+            if (!odds.bookmakers || odds.bookmakers.length === 0) {
+                content.innerHTML = '<p>No hay cuotas disponibles</p>';
+                return;
+            }
+            
+            // Mostrar mejores cuotas
+            content.innerHTML = `
+                <h5>Mejores Cuotas del Mercado</h5>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Mejor Local</div>
+                            <div class="stat-value">${odds.bestOdds.home.odds}</div>
+                            <small class="text-muted">${odds.bestOdds.home.bookmaker}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Mejor Empate</div>
+                            <div class="stat-value">${odds.bestOdds.draw.odds}</div>
+                            <small class="text-muted">${odds.bestOdds.draw.bookmaker}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box">
+                            <div class="stat-label">Mejor Visitante</div>
+                            <div class="stat-value">${odds.bestOdds.away.odds}</div>
+                            <small class="text-muted">${odds.bestOdds.away.bookmaker}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5>Comparación de Casas</h5>
+                <div class="odds-comparison">
+                    ${odds.bookmakers.map(bm => `
+                        <div class="bookmaker-card ${
+                            bm.odds.home == odds.bestOdds.home.odds ||
+                            bm.odds.draw == odds.bestOdds.draw.odds ||
+                            bm.odds.away == odds.bestOdds.away.odds ? 'best-odds' : ''
+                        }">
+                            <h6>${bm.name}</h6>
+                            <div>1: ${bm.odds.home}</div>
+                            <div>X: ${bm.odds.draw}</div>
+                            <div>2: ${bm.odds.away}</div>
+                            ${bm.bonus ? `<small class="text-muted">${bm.bonus}</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${odds.arbitrageOpportunity && odds.arbitrageOpportunity.exists ? `
+                    <div class="arbitrage-alert mt-4">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>¡Oportunidad de Arbitraje!</h5>
+                        <p>Beneficio garantizado: <strong>${odds.arbitrageOpportunity.profit}</strong></p>
+                        <div>
+                            <strong>Distribución de apuestas:</strong>
+                            <ul>
+                                <li>Local: ${odds.arbitrageOpportunity.distribution.home.stake} en ${odds.arbitrageOpportunity.distribution.home.bookmaker}</li>
+                                <li>Empate: ${odds.arbitrageOpportunity.distribution.draw.stake} en ${odds.arbitrageOpportunity.distribution.draw.bookmaker}</li>
+                                <li>Visitante: ${odds.arbitrageOpportunity.distribution.away.stake} en ${odds.arbitrageOpportunity.distribution.away.bookmaker}</li>
+                            </ul>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Mostrar estadísticas
+        function displayStats(form) {
+            const content = document.getElementById('statsContent');
+            
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>${document.getElementById('resultHomeTeam').textContent}</h5>
+                        <div class="mb-3">
+                            <strong>Forma reciente:</strong>
+                            ${form.home.formString.split('').map(r => 
+                                `<span class="form-indicator form-${r.toLowerCase()}">${r}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Victorias</div>
+                                <div class="stat-value">${form.home.wins}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Empates</div>
+                                <div class="stat-value">${form.home.draws}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Derrotas</div>
+                                <div class="stat-value">${form.home.losses}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Goles a favor</div>
+                                <div class="stat-value">${form.home.goalsScored}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>${document.getElementById('resultAwayTeam').textContent}</h5>
+                        <div class="mb-3">
+                            <strong>Forma reciente:</strong>
+                            ${form.away.formString.split('').map(r => 
+                                `<span class="form-indicator form-${r.toLowerCase()}">${r}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Victorias</div>
+                                <div class="stat-value">${form.away.wins}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Empates</div>
+                                <div class="stat-value">${form.away.draws}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Derrotas</div>
+                                <div class="stat-value">${form.away.losses}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Goles a favor</div>
+                                <div class="stat-value">${form.away.goalsScored}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mostrar análisis de valor
+        function displayValueAnalysis(valueAnalysis, odds) {
+            const content = document.getElementById('valueContent');
+            
+            if (!valueAnalysis || !valueAnalysis.valueBets) {
+                content.innerHTML = '<p>No se encontraron apuestas de valor</p>';
+                return;
+            }
+            
+            content.innerHTML = `
+                <h5>Apuestas de Valor Detectadas</h5>
+                ${valueAnalysis.valueBets.length > 0 ? `
+                    <div class="row">
+                        ${valueAnalysis.valueBets.map(bet => `
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">${bet.market}</h6>
+                                        <p class="mb-2">
+                                            <strong>Valor Esperado:</strong> 
+                                            <span class="value-indicator ${bet.ev > 0 ? 'value-positive' : 'value-negative'}">
+                                                ${(bet.ev * 100).toFixed(2)}%
+                                            </span>
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Edge:</strong> ${(bet.edge * 100).toFixed(2)}%
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Probabilidad IA:</strong> ${(bet.aiProbability * 100).toFixed(1)}%
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Cuota promedio:</strong> ${bet.odds}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '<p>No se encontraron apuestas con valor positivo</p>'}
+                
+                <div class="mt-4">
+                    <h5>Análisis de Overround</h5>
+                    <p>El margen de las casas de apuestas es del <strong>${odds.valueAnalysis.overround}</strong></p>
+                    <p>Cuotas justas estimadas:</p>
+                    <ul>
+                        <li>Local: ${odds.valueAnalysis.fairOdds.home}</li>
+                        <li>Empate: ${odds.valueAnalysis.fairOdds.draw}</li>
+                        <li>Visitante: ${odds.valueAnalysis.fairOdds.away}</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Mostrar recomendaciones
+        function displayRecommendations(recommendations) {
+            const content = document.getElementById('recommendationsContent');
+            
+            content.innerHTML = recommendations.map(rec => {
+                let icon = 'fa-lightbulb';
+                let bgClass = 'bg-info';
+                
+                if (rec.type === 'arbitrage') {
+                    icon = 'fa-dollar-sign';
+                    bgClass = 'bg-warning';
+                } else if (rec.type === 'value') {
+                    icon = 'fa-gem';
+                    bgClass = 'bg-success';
+                } else if (rec.type === 'form') {
+                    icon = 'fa-chart-line';
+                    bgClass = 'bg-primary';
+                }
+                
+                return `
+                    <div class="recommendation-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-3">
+                                <span class="badge ${bgClass} p-2">
+                                    <i class="fas ${icon}"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">${rec.market || rec.type}</h6>
+                                ${rec.confidence ? `<small>Confianza: ${rec.confidence}</small>` : ''}
+                            </div>
+                        </div>
+                        <p class="mb-0">${rec.reason}</p>
+                        ${rec.expectedValue ? `<p class="mb-0"><strong>Valor esperado: ${rec.expectedValue}</strong></p>` : ''}
+                        ${rec.odds ? `<p class="mb-0"><strong>Cuota recomendada: ${rec.odds}</strong></p>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLeagues();
+        });
     </script>
 </body>
 </html>
