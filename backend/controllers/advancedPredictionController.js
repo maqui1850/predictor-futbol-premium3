@@ -412,3 +412,6 @@ const advancedPredictionController = {
       return "Predicción de baja fiabilidad debido a escasez de datos o alta volatilidad.";
     }
   }
+};
+
+module.exports = advancedPredictionController;

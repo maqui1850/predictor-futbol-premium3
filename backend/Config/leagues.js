@@ -1,223 +1,172 @@
 // backend/config/leagues.js
-module.exports = {
+const leagues = {
   // EUROPA
   'Premier League': {
     id: 39,
+    name: 'Premier League',
     country: 'England',
     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
     teams: [
-      'Manchester City', 'Manchester United', 'Liverpool', 'Chelsea', 'Arsenal',
-      'Tottenham', 'Newcastle', 'Brighton', 'West Ham', 'Aston Villa',
-      'Crystal Palace', 'Brentford', 'Fulham', 'Wolves', 'Everton',
-      'Nottingham Forest', 'Bournemouth', 'Sheffield United', 'Burnley', 'Luton Town'
+      'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
+      'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham',
+      'Liverpool', 'Luton Town', 'Manchester City', 'Manchester United',
+      'Newcastle', 'Nottingham Forest', 'Sheffield United', 'Tottenham',
+      'West Ham', 'Wolves'
     ]
   },
   'La Liga': {
     id: 140,
+    name: 'La Liga',
     country: 'Spain',
     flag: '🇪🇸',
     teams: [
-      'Real Madrid', 'Barcelona', 'Atletico Madrid', 'Real Sociedad', 'Athletic Bilbao',
-      'Real Betis', 'Villarreal', 'Valencia', 'Sevilla', 'Girona',
-      'Las Palmas', 'Getafe', 'Celta Vigo', 'Rayo Vallecano', 'Mallorca',
-      'Alaves', 'Cadiz', 'Granada', 'Almeria', 'Osasuna'
+      'Alaves', 'Almeria', 'Athletic Bilbao', 'Atletico Madrid', 'Barcelona',
+      'Cadiz', 'Celta Vigo', 'Getafe', 'Girona', 'Granada', 'Las Palmas',
+      'Mallorca', 'Osasuna', 'Rayo Vallecano', 'Real Betis', 'Real Madrid',
+      'Real Sociedad', 'Sevilla', 'Valencia', 'Villarreal'
     ]
   },
   'Serie A': {
     id: 135,
+    name: 'Serie A',
     country: 'Italy',
     flag: '🇮🇹',
     teams: [
-      'Inter', 'AC Milan', 'Juventus', 'Napoli', 'Roma',
-      'Atalanta', 'Lazio', 'Fiorentina', 'Bologna', 'Torino',
-      'Monza', 'Udinese', 'Sassuolo', 'Empoli', 'Salernitana',
-      'Lecce', 'Cagliari', 'Genoa', 'Verona', 'Frosinone'
+      'AC Milan', 'AS Roma', 'Atalanta', 'Bologna', 'Cagliari', 'Empoli',
+      'Fiorentina', 'Frosinone', 'Genoa', 'Hellas Verona', 'Inter Milan',
+      'Juventus', 'Lazio', 'Lecce', 'Monza', 'Napoli', 'Salernitana',
+      'Sassuolo', 'Torino', 'Udinese'
     ]
   },
   'Bundesliga': {
     id: 78,
+    name: 'Bundesliga',
     country: 'Germany',
     flag: '🇩🇪',
     teams: [
-      'Bayern Munich', 'Borussia Dortmund', 'RB Leipzig', 'Bayer Leverkusen', 'Union Berlin',
-      'Eintracht Frankfurt', 'Freiburg', 'Hoffenheim', 'Werder Bremen', 'Augsburg',
-      'Stuttgart', 'Wolfsburg', 'Borussia Monchengladbach', 'Mainz', 'Koln',
-      'Heidenheim', 'Darmstadt', 'Bochum'
+      'Augsburg', 'Bayer Leverkusen', 'Bayern Munich', 'Borussia Dortmund',
+      'Borussia Monchengladbach', 'Darmstadt', 'Eintracht Frankfurt',
+      'FC Cologne', 'Freiburg', 'Heidenheim', 'Hoffenheim', 'Mainz',
+      'RB Leipzig', 'Stuttgart', 'Union Berlin', 'Werder Bremen', 'Wolfsburg', 'Bochum'
     ]
   },
   'Ligue 1': {
     id: 61,
+    name: 'Ligue 1',
     country: 'France',
     flag: '🇫🇷',
     teams: [
-      'PSG', 'Monaco', 'Marseille', 'Lille', 'Nice',
-      'Lyon', 'Lens', 'Rennes', 'Reims', 'Toulouse',
-      'Montpellier', 'Strasbourg', 'Brest', 'Nantes', 'Le Havre',
-      'Metz', 'Lorient', 'Clermont'
-    ]
-  },
-  'Eredivisie': {
-    id: 88,
-    country: 'Netherlands',
-    flag: '🇳🇱',
-    teams: [
-      'Ajax', 'PSV', 'Feyenoord', 'AZ Alkmaar', 'Twente',
-      'Vitesse', 'Utrecht', 'Go Ahead Eagles', 'Heerenveen', 'Fortuna Sittard',
-      'RKC Waalwijk', 'NEC', 'Sparta Rotterdam', 'Excelsior', 'Almere City',
-      'PEC Zwolle', 'Volendam', 'Heracles'
-    ]
-  },
-  'Primeira Liga': {
-    id: 94,
-    country: 'Portugal',
-    flag: '🇵🇹',
-    teams: [
-      'Benfica', 'Porto', 'Sporting CP', 'Braga', 'Vitoria Guimaraes',
-      'Famalicao', 'Chaves', 'Casa Pia', 'Rio Ave', 'Boavista',
-      'Arouca', 'Vizela', 'Portimonense', 'Gil Vicente', 'Estrela',
-      'Moreirense', 'Estoril', 'Farense'
+      'Brest', 'Clermont', 'Le Havre', 'Lens', 'Lille', 'Lorient', 'Lyon',
+      'Marseille', 'Metz', 'Monaco', 'Montpellier', 'Nantes', 'Nice',
+      'Paris Saint-Germain', 'Reims', 'Rennes', 'Strasbourg', 'Toulouse'
     ]
   },
   
-  // AMERICAS
+  // AMÉRICA
   'Liga MX': {
     id: 262,
+    name: 'Liga MX',
     country: 'Mexico',
     flag: '🇲🇽',
     teams: [
-      'Club America', 'Chivas', 'Cruz Azul', 'Pumas', 'Tigres',
-      'Monterrey', 'Santos Laguna', 'Toluca', 'Leon', 'Pachuca',
-      'Necaxa', 'Queretaro', 'Atlas', 'Mazatlan', 'Puebla',
-      'San Luis', 'Tijuana', 'FC Juarez'
+      'America', 'Atlas', 'Cruz Azul', 'Guadalajara', 'Juarez', 'Leon',
+      'Mazatlan', 'Monterrey', 'Necaxa', 'Pachuca', 'Puebla', 'Pumas UNAM',
+      'Queretaro', 'Santos Laguna', 'Tigres UANL', 'Tijuana', 'Toluca'
     ]
   },
   'Liga Argentina': {
     id: 128,
+    name: 'Liga Argentina',
     country: 'Argentina',
     flag: '🇦🇷',
     teams: [
-      'River Plate', 'Boca Juniors', 'Racing Club', 'Independiente', 'San Lorenzo',
-      'Estudiantes', 'Velez Sarsfield', 'Lanus', 'Belgrano', 'Defensa y Justicia',
-      'Talleres', 'Godoy Cruz', 'Argentinos Juniors', 'Instituto', 'Platense',
-      'Rosario Central', 'Newell\'s', 'Gimnasia', 'Colon', 'Union',
-      'Huracan', 'Barracas Central', 'Banfield', 'Tigre', 'Sarmiento',
-      'Central Cordoba', 'Arsenal', 'Atletico Tucuman'
+      'Argentinos Juniors', 'Arsenal Sarandi', 'Atletico Tucuman', 'Banfield',
+      'Barracas Central', 'Belgrano', 'Boca Juniors', 'Central Cordoba',
+      'Colon', 'Defensa y Justicia', 'Estudiantes', 'Godoy Cruz', 'Huracan',
+      'Independiente', 'Instituto', 'Lanus', 'Newell\'s Old Boys', 'Platense',
+      'Racing Club', 'River Plate', 'Rosario Central', 'San Lorenzo',
+      'Sarmiento', 'Talleres', 'Tigre', 'Union Santa Fe', 'Velez Sarsfield'
     ]
   },
   'Brasileirao': {
     id: 71,
+    name: 'Brasileirao',
     country: 'Brazil',
     flag: '🇧🇷',
     teams: [
-      'Palmeiras', 'Flamengo', 'Fluminense', 'Atletico Mineiro', 'Gremio',
-      'Internacional', 'Sao Paulo', 'Corinthians', 'Botafogo', 'Santos',
-      'Fortaleza', 'Cruzeiro', 'Bragantino', 'Athletico-PR', 'Bahia',
-      'Vasco', 'Cuiaba', 'Goias', 'Coritiba', 'America-MG'
+      'America MG', 'Athletico Paranaense', 'Atletico Mineiro', 'Bahia',
+      'Botafogo', 'Corinthians', 'Coritiba', 'Cruzeiro', 'Cuiaba', 'Flamengo',
+      'Fluminense', 'Fortaleza', 'Goias', 'Gremio', 'Internacional',
+      'Palmeiras', 'Red Bull Bragantino', 'Santos', 'Sao Paulo', 'Vasco da Gama'
     ]
   },
   'MLS': {
     id: 253,
+    name: 'MLS',
     country: 'USA',
     flag: '🇺🇸',
     teams: [
-      'Inter Miami', 'LA Galaxy', 'LAFC', 'Atlanta United', 'Seattle Sounders',
-      'Portland Timbers', 'New York City FC', 'New York Red Bulls', 'Philadelphia Union', 'Columbus Crew',
-      'FC Cincinnati', 'Nashville SC', 'Orlando City', 'Charlotte FC', 'Toronto FC',
-      'CF Montreal', 'Vancouver Whitecaps', 'Austin FC', 'Real Salt Lake', 'Minnesota United',
-      'Houston Dynamo', 'St. Louis City', 'Sporting KC', 'FC Dallas', 'Colorado Rapids',
-      'San Jose Earthquakes', 'Chicago Fire', 'New England Revolution', 'DC United'
-    ]
-  },
-  'Liga Colombiana': {
-    id: 239,
-    country: 'Colombia',
-    flag: '🇨🇴',
-    teams: [
-      'Atletico Nacional', 'Millonarios', 'America de Cali', 'Deportivo Cali', 'Junior',
-      'Santa Fe', 'Once Caldas', 'Deportes Tolima', 'Medellin', 'La Equidad',
-      'Bucaramanga', 'Pereira', 'Envigado', 'Aguilas Doradas', 'Patriotas',
-      'Boyaca Chico', 'Alianza Petrolera', 'Jaguares', 'Union Magdalena', 'Atletico Huila'
+      'Atlanta United', 'Austin FC', 'Charlotte FC', 'Chicago Fire',
+      'Cincinnati', 'Colorado Rapids', 'Columbus Crew', 'DC United',
+      'Houston Dynamo', 'Inter Miami', 'LA Galaxy', 'LAFC', 'Minnesota United',
+      'Montreal Impact', 'Nashville SC', 'New England Revolution',
+      'New York City FC', 'New York Red Bulls', 'Orlando City', 'Philadelphia Union',
+      'Portland Timbers', 'Real Salt Lake', 'San Jose Earthquakes',
+      'Seattle Sounders', 'Sporting Kansas City', 'St. Louis City',
+      'Toronto FC', 'Vancouver Whitecaps'
     ]
   },
   
-  // ASIA
-  'J-League': {
-    id: 98,
-    country: 'Japan',
-    flag: '🇯🇵',
+  // RESTO DEL MUNDO
+  'Eredivisie': {
+    id: 88,
+    name: 'Eredivisie',
+    country: 'Netherlands',
+    flag: '🇳🇱',
     teams: [
-      'Yokohama F-Marinos', 'Kawasaki Frontale', 'Vissel Kobe', 'Nagoya Grampus', 'Cerezo Osaka',
-      'FC Tokyo', 'Kashima Antlers', 'Sanfrecce Hiroshima', 'Gamba Osaka', 'Urawa Red Diamonds',
-      'Consadole Sapporo', 'Avispa Fukuoka', 'Kashiwa Reysol', 'Shonan Bellmare', 'Albirex Niigata',
-      'Kyoto Sanga', 'Sagan Tosu', 'Yokohama FC'
+      'Ajax', 'Almere City', 'AZ Alkmaar', 'Excelsior', 'Feyenoord',
+      'Fortuna Sittard', 'Go Ahead Eagles', 'Heerenveen', 'Heracles',
+      'NEC Nijmegen', 'PEC Zwolle', 'PSV', 'RKC Waalwijk', 'Sparta Rotterdam',
+      'Twente', 'Utrecht', 'Vitesse', 'Volendam'
     ]
   },
-  'K-League': {
-    id: 292,
-    country: 'South Korea',
-    flag: '🇰🇷',
+  'Liga Portugal': {
+    id: 94,
+    name: 'Liga Portugal',
+    country: 'Portugal',
+    flag: '🇵🇹',
     teams: [
-      'Ulsan Hyundai', 'Jeonbuk Motors', 'Pohang Steelers', 'Incheon United', 'FC Seoul',
-      'Suwon Samsung', 'Jeju United', 'Daegu FC', 'Gangwon FC', 'Gwangju FC',
-      'Daejeon Hana', 'Suwon FC'
+      'Arouca', 'Benfica', 'Boavista', 'Braga', 'Casa Pia', 'Chaves',
+      'Estoril', 'Estrela Amadora', 'Famalicao', 'Farense', 'Gil Vicente',
+      'Moreirense', 'Portimonense', 'Porto', 'Rio Ave', 'Sporting CP',
+      'Vitoria Guimaraes', 'Vizela'
     ]
   },
-  'Saudi Pro League': {
-    id: 307,
-    country: 'Saudi Arabia',
-    flag: '🇸🇦',
-    teams: [
-      'Al-Hilal', 'Al-Nassr', 'Al-Ittihad', 'Al-Ahli', 'Al-Shabab',
-      'Al-Taawoun', 'Al-Fateh', 'Al-Ettifaq', 'Al-Raed', 'Al-Wehda',
-      'Damac', 'Al-Khaleej', 'Al-Fayha', 'Al-Tai', 'Abha',
-      'Al-Hazem', 'Al-Riyadh', 'Al-Akhdoud'
-    ]
-  },
-  
-  // OTROS
-  'Championship': {
-    id: 40,
-    country: 'England',
-    flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-    teams: [
-      'Leicester', 'Leeds United', 'Southampton', 'West Brom', 'Norwich',
-      'Coventry', 'Preston', 'Cardiff', 'Swansea', 'Bristol City',
-      'Millwall', 'Blackburn', 'Sunderland', 'Watford', 'Middlesbrough',
-      'QPR', 'Stoke City', 'Birmingham', 'Plymouth', 'Ipswich',
-      'Hull City', 'Huddersfield', 'Sheffield Wednesday', 'Rotherham'
-    ]
-  },
-  'Superliga Turquia': {
+  'Super Lig': {
     id: 203,
+    name: 'Super Lig',
     country: 'Turkey',
     flag: '🇹🇷',
     teams: [
-      'Galatasaray', 'Fenerbahce', 'Besiktas', 'Trabzonspor', 'Istanbul Basaksehir',
-      'Konyaspor', 'Adana Demirspor', 'Antalyaspor', 'Kasimpasa', 'Sivasspor',
-      'Kayserispor', 'Alanyaspor', 'Fatih Karagumruk', 'Gaziantep', 'Hatayspor',
-      'Istanbulspor', 'Ankaragucu', 'Rizespor', 'Samsunspor', 'Pendikspor'
+      'Adana Demirspor', 'Alanyaspor', 'Ankaragucu', 'Antalyaspor',
+      'Besiktas', 'Caykur Rizespor', 'Fatih Karagumruk', 'Fenerbahce',
+      'Galatasaray', 'Gaziantep', 'Hatayspor', 'Istanbulspor', 'Kasimpasa',
+      'Kayserispor', 'Konyaspor', 'Pendikspor', 'Samsunspor', 'Sivasspor',
+      'Trabzonspor'
     ]
   },
   'Russian Premier League': {
     id: 235,
+    name: 'Russian Premier League',
     country: 'Russia',
     flag: '🇷🇺',
     teams: [
-      'Zenit', 'Spartak Moscow', 'CSKA Moscow', 'Dynamo Moscow', 'Lokomotiv Moscow',
-      'Krasnodar', 'Rostov', 'Sochi', 'Akhmat Grozny', 'Rubin Kazan',
-      'Ural', 'Orenburg', 'Torpedo Moscow', 'Krylia Sovetov', 'Nizhny Novgorod',
-      'Fakel Voronezh'
-    ]
-  },
-  'Allsvenskan': {
-    id: 113,
-    country: 'Sweden',
-    flag: '🇸🇪',
-    teams: [
-      'Malmo FF', 'AIK', 'Djurgarden', 'Hammarby', 'Elfsborg',
-      'Hacken', 'Norrkoping', 'Sirius', 'Mjallby', 'Varberg',
-      'Kalmar', 'Goteborg', 'Brommapojkarna', 'Halmstad', 'Degerfors',
-      'Varnamo'
+      'Akhmat Grozny', 'CSKA Moscow', 'Dinamo Moscow', 'Fakel Voronezh',
+      'Krasnodar', 'Krylya Sovetov', 'Lokomotiv Moscow', 'Nizhny Novgorod',
+      'Orenburg', 'Rostov', 'Rubin Kazan', 'Sochi', 'Spartak Moscow',
+      'Ural', 'Zenit'
     ]
   }
 };
+
+module.exports = leagues;
