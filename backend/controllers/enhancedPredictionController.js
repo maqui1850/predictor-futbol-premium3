@@ -1,6 +1,6 @@
 // backend/controllers/enhancedPredictionController.js
 const leagues = require('../config/leagues');
-const webScrapingService = require('../services/webScrapingService');
+const scrapingService = require('../services/scrapingService');
 const oddsComparisonService = require('../services/oddsComparisonService');
 const pythonClient = require('../services/pythonClient');
 const simplePredictionModel = require('../models/simplePredictionModel');
