@@ -1,7 +1,7 @@
 // backend/services/oddsComparisonService.js
 const axios = require('axios');
 const cache = require('../utils/cache');
-const webScrapingService = require('./webScrapingService');
+const scrapingService = require('./scrapingService');
 
 class OddsComparisonService {
   constructor() {
